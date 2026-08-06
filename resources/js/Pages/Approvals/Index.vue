@@ -68,7 +68,7 @@ const viewProof = (url) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-bold text-2xl dark:text-white leading-tight">
                 ✅ Menunggu Persetujuan
             </h2>
         </template>
@@ -101,7 +101,7 @@ const viewProof = (url) => {
                             <div class="flex-1">
                                 <div class="flex items-start justify-between mb-3">
                                     <div>
-                                        <h3 class="text-xl font-bold text-slate-800">{{ transaction.category }}</h3>
+                                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">{{ transaction.category }}</h3>
                                         <p class="text-sm text-slate-500 mt-1">
                                             Diajukan oleh: <strong>{{ transaction.verified_by_name }}</strong>
                                         </p>
@@ -112,7 +112,7 @@ const viewProof = (url) => {
                                 <div class="grid grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <div class="text-xs text-slate-500 uppercase">Tanggal</div>
-                                        <div class="text-lg font-semibold text-slate-700">{{ transaction.formatted_date }}</div>
+                                        <div class="text-lg font-semibold text-slate-700 dark:text-slate-300">{{ transaction.formatted_date }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-slate-500 uppercase">Jumlah</div>
@@ -122,7 +122,7 @@ const viewProof = (url) => {
 
                                 <div v-if="transaction.description" class="mb-4">
                                     <div class="text-xs text-slate-500 uppercase mb-1">Keterangan</div>
-                                    <p class="text-slate-700">{{ transaction.description }}</p>
+                                    <p class="text-slate-700 dark:text-slate-300">{{ transaction.description }}</p>
                                 </div>
 
                                 <!-- Proof Thumbnail -->
@@ -167,8 +167,8 @@ const viewProof = (url) => {
                 <Card v-else padding="xl">
                     <div class="text-center py-12">
                         <div class="text-6xl mb-4">🎉</div>
-                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Tidak Ada Transaksi Pending</h3>
-                        <p class="text-slate-600">Semua transaksi sudah disetujui atau ditolak.</p>
+                        <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Tidak Ada Transaksi Pending</h3>
+                        <p class="text-slate-600 dark:text-slate-400">Semua transaksi sudah disetujui atau ditolak.</p>
                     </div>
                 </Card>
             </div>
@@ -200,7 +200,7 @@ const viewProof = (url) => {
                             leave-from="opacity-100 scale-100"
                             leave-to="opacity-0 scale-95"
                         >
-                            <DialogPanel class="relative transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all w-full max-w-md">
+                            <DialogPanel class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl transition-all w-full max-w-md">
                                 <div class="bg-red-500 px-6 py-4">
                                     <DialogTitle class="text-xl font-semibold text-white">
                                         Tolak Transaksi
@@ -208,18 +208,18 @@ const viewProof = (url) => {
                                 </div>
 
                                 <div class="p-6">
-                                    <p v-if="selectedTransaction" class="text-slate-700 mb-4">
+                                    <p v-if="selectedTransaction" class="text-slate-700 dark:text-slate-300 mb-4">
                                         Anda akan menolak pengeluaran <strong>{{ selectedTransaction.category }}</strong> 
-                                        sebesar <strong class="text-red-600">{{ selectedTransaction.formatted_amount }}</strong>.
+                                        sebesar <strong class="text-red-600 dark:text-red-400">{{ selectedTransaction.formatted_amount }}</strong>.
                                     </p>
 
-                                    <label class="block mb-2 font-semibold text-slate-700">
+                                    <label class="block mb-2 font-semibold text-slate-700 dark:text-slate-300">
                                         Alasan Penolakan <span class="text-red-500">*</span>
                                     </label>
                                     <textarea
                                         v-model="rejectForm.rejection_reason"
                                         rows="4"
-                                        class="w-full rounded-lg border-slate-300 focus:border-red-500 focus:ring-red-500"
+                                        class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-red-500 focus:ring-red-500"
                                         placeholder="Jelaskan alasan penolakan dengan jelas..."
                                         required
                                     ></textarea>
@@ -228,7 +228,7 @@ const viewProof = (url) => {
                                     </p>
                                 </div>
 
-                                <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3">
+                                <div class="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-end gap-3">
                                     <button
                                         @click="closeRejectModal"
                                         class="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition-colors"

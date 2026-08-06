@@ -76,7 +76,7 @@ const columns = [
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+                <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                     👥 User Management
                 </h2>
                 <div class="flex gap-3">
@@ -113,8 +113,8 @@ const columns = [
 
                 <Card padding="sm">
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-slate-800 mb-2">Daftar Pengguna</h3>
-                        <p class="text-slate-600 mb-4">Kelola akses pengguna dan impersonate untuk testing.</p>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Daftar Pengguna</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-4">Kelola akses pengguna dan impersonate untuk testing.</p>
                     </div>
                     
                     <ModernTable
@@ -163,8 +163,8 @@ const columns = [
                     <div class="flex items-start gap-4">
                         <span class="text-4xl">💡</span>
                         <div>
-                            <h4 class="font-bold text-slate-800 mb-2">Tentang Impersonation</h4>
-                            <ul class="text-sm text-slate-600 space-y-1">
+                            <h4 class="font-bold text-slate-800 dark:text-white mb-2">Tentang Impersonation</h4>
+                            <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
                                 <li>• <strong>Login As:</strong> Masuk sebagai user lain untuk testing tanpa password</li>
                                 <li>• <strong>Segregation:</strong> Setiap role memiliki akses berbeda (bendahara, ketua, marbot)</li>
                                 <li>• <strong>Audit:</strong> Semua aktivitas impersonation tercatat di session</li>
@@ -179,35 +179,35 @@ const columns = [
         <!-- Create User Modal -->
         <Modal :show="isModalOpen" maxWidth="2xl" @close="closeModal">
             <div class="p-6">
-                <h2 class="text-lg font-medium text-slate-900 mb-6">
+                <h2 class="text-lg font-medium text-slate-900 dark:text-white mb-6">
                     Tambah User Baru
                 </h2>
 
                 <form @submit.prevent="submitForm" class="space-y-4">
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
                         <input v-model="form.name" type="text" required class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500" placeholder="Nama lengkap user">
                         <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
                         <input v-model="form.email" type="email" required class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500" placeholder="email@example.com">
                         <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</div>
                     </div>
 
                     <!-- Password -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
                         <input v-model="form.password" type="password" required class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500" placeholder="Minimal 8 karakter">
                         <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</div>
                     </div>
 
                     <!-- Role -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Role</label>
                         <select v-model="form.role" required class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500">
                             <option value="marbot">Marbot</option>
                             <option value="bendahara">Bendahara</option>

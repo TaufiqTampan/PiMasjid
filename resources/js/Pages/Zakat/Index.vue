@@ -36,7 +36,7 @@ const formatRupiah = (amount) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                 🕌 Data Zakat
             </h2>
         </template>
@@ -77,7 +77,7 @@ const formatRupiah = (amount) => {
                 </div>
 
                 <!-- Filters & Actions -->
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <input
                             v-model="search"
@@ -109,21 +109,21 @@ const formatRupiah = (amount) => {
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
                     <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Muzakki</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Jumlah</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Petugas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Muzakki</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Jumlah</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Petugas</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-slate-200">
+                        <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                             <tr v-for="zakat in zakats.data" :key="zakat.id" class="hover:bg-slate-50">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-slate-900">{{ zakat.muzakki_name }}</div>
+                                    <div class="font-medium text-slate-900 dark:text-white">{{ zakat.muzakki_name }}</div>
                                     <div v-if="zakat.muzakki_nik" class="text-sm text-slate-500">NIK: {{ zakat.muzakki_nik }}</div>
                                     <div v-if="zakat.person_count" class="text-sm text-slate-500">{{ zakat.person_count }} jiwa</div>
                                 </td>
@@ -156,7 +156,7 @@ const formatRupiah = (amount) => {
                     </table>
 
                     <!-- Pagination -->
-                    <div class="px-6 py-4 bg-slate-50 border-t">
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t dark:border-slate-700">
                         <div class="flex justify-between items-center">
                             <div class="text-sm text-slate-600">
                                 Showing {{ zakats.from }} - {{ zakats.to }} of {{ zakats.total }}

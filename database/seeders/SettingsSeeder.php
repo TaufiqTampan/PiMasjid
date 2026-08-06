@@ -177,6 +177,50 @@ class SettingsSeeder extends Seeder
                 'group' => 'location',
                 'label' => 'Zona Waktu',
             ],
+
+            // Display Signage (TV Display Digital)
+            [
+                'key' => 'display_running_text',
+                'value' => 'Selamat datang di MasjidVision. Mohon matikan atau heningkan HP Anda saat berada di dalam area sholat. Luruskan dan rapatkan shaf.',
+                'type' => 'textarea',
+                'group' => 'display',
+                'label' => 'Teks Running Text (Pengumuman Berjalan)',
+            ],
+            [
+                'key' => 'iqamah_duration_subuh',
+                'value' => '10',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Jeda Iqamah Subuh (Menit)',
+            ],
+            [
+                'key' => 'iqamah_duration_dhuhr',
+                'value' => '10',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Jeda Iqamah Dzuhur (Menit)',
+            ],
+            [
+                'key' => 'iqamah_duration_asr',
+                'value' => '10',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Jeda Iqamah Ashar (Menit)',
+            ],
+            [
+                'key' => 'iqamah_duration_maghrib',
+                'value' => '7',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Jeda Iqamah Maghrib (Menit)',
+            ],
+            [
+                'key' => 'iqamah_duration_isha',
+                'value' => '10',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Jeda Iqamah Isya (Menit)',
+            ],
         ];
 
         foreach ($settings as $setting) {

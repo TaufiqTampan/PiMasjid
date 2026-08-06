@@ -16,15 +16,33 @@ class CloudinaryService
      */
     public static function upload(UploadedFile $file, string $folder = 'general'): array
     {
-        $result = Cloudinary::uploadApi()->upload($file->getRealPath(), [
-            'folder' => 'pimasjid/' . $folder,
-            'resource_type' => 'auto',
-        ]);
+        // Fallback to local storage if Cloudinary is not configured
+        if (!env('CLOUDINARY_URL')) {
+            $path = $file->store('posts', 'public');
+            return [
+                'url' => $path, // This will be stored in image_path
+                'public_id' => null,
+            ];
+        }
 
-        return [
-            'url' => $result['secure_url'],
-            'public_id' => $result['public_id'],
-        ];
+        try {
+            $result = Cloudinary::upload($file->getRealPath(), [
+                'folder' => 'pimasjid/' . $folder,
+                'resource_type' => 'auto',
+            ]);
+
+            return [
+                'url' => $result->getSecurePath(),
+                'public_id' => $result->getPublicId(),
+            ];
+        } catch (\Exception $e) {
+            // Fallback to local if upload fails
+            $path = $file->store('posts', 'public');
+            return [
+                'url' => $path,
+                'public_id' => null,
+            ];
+        }
     }
 
     /**
@@ -36,7 +54,7 @@ class CloudinaryService
     public static function delete(string $publicId): bool
     {
         try {
-            Cloudinary::uploadApi()->destroy($publicId);
+            Cloudinary::destroy($publicId);
             return true;
         } catch (\Exception $e) {
             return false;
@@ -57,8 +75,6 @@ class CloudinaryService
             'fetch_format' => 'auto',
         ];
 
-        return Cloudinary::image($publicId)
-            ->addTransformation(array_merge($defaultOptions, $options))
-            ->toUrl();
+        return Cloudinary::getUrl($publicId, array_merge($defaultOptions, $options));
     }
 }

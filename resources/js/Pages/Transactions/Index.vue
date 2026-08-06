@@ -15,13 +15,8 @@ import {
     DocumentTextIcon, 
     TableCellsIcon,
     TrashIcon,
-    MagnifyingGlassIcon,
-    BanknotesIcon,
-    XMarkIcon,
-    PhotoIcon,
-    CheckCircleIcon,
-    ArrowUpTrayIcon
-} from '@heroicons/vue/24/outline';
+    MagnifyingGlassIcon
+} from '@heroicons/vue/24/outline'; // Importing icons
 
 const props = defineProps({
     transactions: Object,
@@ -142,9 +137,11 @@ const categories = {
 // Table Columns
 const columns = [
     { key: 'date', label: 'Tanggal' },
-    { key: 'details', label: 'Rincian Transaksi' },
+    { key: 'type', label: 'Tipe' },
+    { key: 'category', label: 'Kategori' },
+    { key: 'description', label: 'Keterangan' },
     { key: 'amount', label: 'Jumlah (Rp)' },
-    { key: 'status', label: 'Verifikasi' },
+    { key: 'verified_by', label: 'Diverifikasi' },
     { key: 'actions', label: 'Aksi' },
 ];
 
@@ -159,260 +156,201 @@ const formatCurrency = (val) => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-emerald-100 rounded-xl">
-                        <BanknotesIcon class="w-6 h-6 text-emerald-600" />
-                    </div>
-                    <h2 class="font-black text-2xl text-slate-800 leading-tight">Keuangan Masjid</h2>
-                </div>
+                <h2 class="font-bold text-2xl leading-tight text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>💰</span> Manajemen Keuangan
+                </h2>
                 <button 
                     @click="showCreateModal = true"
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                    class="btn-primary flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all"
                 >
-                    <PlusIcon class="w-5 h-5 stroke-2" />
-                    <span>Catat Transaksi</span>
+                    <PlusIcon class="w-5 h-5" />
+                    <span>Tambah Transaksi</span>
                 </button>
             </div>
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 
                 <!-- Filters & Export -->
-                <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
-                    <div class="flex flex-col xl:flex-row gap-8 justify-between items-start xl:items-end">
+                <Card padding="md" class="border border-slate-200">
+                    <div class="flex flex-col xl:flex-row gap-6 justify-between items-start xl:items-end">
                         <!-- Filters -->
-                        <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Dari Tanggal</label>
+                        <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Dari Tanggal</label>
                                 <input 
                                     v-model="filterForm.start_date" 
                                     type="date" 
-                                    class="w-full rounded-2xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 font-bold bg-slate-50 transition-all text-sm"
+                                    class="w-full rounded-lg border-slate-300 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700"
                                     @change="applyFilters"
                                 />
                             </div>
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Sampai Tanggal</label>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sampai Tanggal</label>
                                 <input 
                                     v-model="filterForm.end_date" 
                                     type="date" 
-                                    class="w-full rounded-2xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 font-bold bg-slate-50 transition-all text-sm"
+                                    class="w-full rounded-lg border-slate-300 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700"
                                     @change="applyFilters"
                                 />
                             </div>
                             <div class="flex flex-wrap gap-2">
-                                <button type="button" @click="setToday" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-black transition-all">HARI INI</button>
-                                <button type="button" @click="setThisMonth" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-black transition-all">BULAN INI</button>
-                                <button type="button" @click="resetFilters" class="px-4 py-2.5 text-rose-500 hover:bg-rose-50 rounded-xl text-xs font-black transition-all border border-transparent hover:border-rose-100 uppercase tracking-widest">Reset</button>
+                                <button type="button" @click="setToday" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-medium transition-colors">Hari Ini</button>
+                                <button type="button" @click="setThisMonth" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-medium transition-colors">Bulan Ini</button>
+                                <button type="button" @click="resetFilters" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-xs font-medium transition-colors border border-transparent hover:border-red-200">Reset</button>
                             </div>
                         </div>
 
                         <!-- Exports -->
-                         <div class="flex gap-3 w-full md:w-auto">
+                         <div class="flex gap-2 w-full md:w-auto">
                             <button 
                                 @click="exportData('pdf')"
-                                class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-white border-2 border-slate-100 text-rose-600 rounded-xl hover:border-rose-100 hover:bg-rose-50 transition-all text-sm font-black uppercase tracking-widest"
+                                class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-red-500 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
                             >
-                                <DocumentTextIcon class="w-5 h-5" />
+                                <DocumentTextIcon class="w-4 h-4" />
                                 <span>PDF</span>
                             </button>
                             <button 
                                 @click="exportData('excel')"
-                                class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-white border-2 border-slate-100 text-emerald-600 rounded-xl hover:border-emerald-100 hover:bg-emerald-50 transition-all text-sm font-black uppercase tracking-widest"
+                                class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-green-600 text-green-700 rounded-lg hover:bg-green-50 transition-colors text-sm font-medium"
                             >
-                                <TableCellsIcon class="w-5 h-5" />
+                                <TableCellsIcon class="w-4 h-4" />
                                 <span>Excel</span>
                             </button>
                         </div>
                     </div>
-                </div>
+                </Card>
 
                 <!-- Transactions Table -->
-                <div class="bg-white overflow-hidden shadow-xl shadow-slate-200/50 rounded-[2.5rem] border border-slate-100">
-                    <div class="p-8">
-                        <ModernTable
-                            :columns="columns"
-                            :data="transactions.data"
+                <ModernTable
+                    :columns="columns"
+                    :data="transactions.data"
+                >
+                    <template #cell-date="{ row }">
+                        <span class="whitespace-nowrap">{{ new Date(row.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) }}</span>
+                    </template>
+                    
+                    <template #cell-type="{ row }">
+                        <Badge :type="row.type === 'income' ? 'success' : 'danger'">
+                            {{ row.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
+                        </Badge>
+                    </template>
+
+                    <template #cell-category="{ row }">
+                        <Badge type="info" outline>{{ row.category }}</Badge>
+                    </template>
+
+                    <template #cell-description="{ row }">
+                        <div class="max-w-xs truncate" :title="row.description">{{ row.description || '-' }}</div>
+                    </template>
+                    
+                    <template #cell-amount="{ row }">
+                        <span :class="['font-mono font-medium', row.type === 'income' ? 'text-emerald-600' : 'text-rose-600']">
+                            {{ row.type === 'income' ? '+' : '-' }} {{ formatCurrency(row.amount) }}
+                        </span>
+                    </template>
+
+                    <template #cell-verified_by="{ row }">
+                        <span class="text-xs text-slate-500">{{ row.verified_by?.name || 'Sistem' }}</span>
+                    </template>
+                    
+                    <template #cell-actions="{ row }">
+                        <button 
+                            @click="deleteTransaction(row.id)"
+                            class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Hapus"
                         >
-                            <template #cell-date="{ row }">
-                                <div class="flex flex-col">
-                                    <span class="font-black text-slate-800 text-sm whitespace-nowrap">{{ new Date(row.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' }) }}</span>
-                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ new Date(row.date).getFullYear() }}</span>
-                                </div>
-                            </template>
-                            
-                            <template #cell-details="{ row }">
-                                <div class="flex items-center gap-3">
-                                    <div :class="row.type === 'income' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'" class="p-2 rounded-xl">
-                                        <BanknotesIcon class="w-5 h-5" />
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="font-black text-slate-800 leading-tight">{{ row.category }}</span>
-                                        <span class="text-xs text-slate-400 font-medium italic truncate max-w-[200px]">{{ row.description || '-' }}</span>
-                                    </div>
-                                </div>
-                            </template>
-                            
-                            <template #cell-amount="{ row }">
-                                <div class="flex flex-col items-end">
-                                    <span :class="['font-black text-md', row.type === 'income' ? 'text-emerald-600' : 'text-rose-600']">
-                                        {{ row.type === 'income' ? '+' : '-' }} {{ formatCurrency(row.amount).replace('Rp', '').trim() }}
-                                    </span>
-                                    <span class="text-[9px] font-black uppercase tracking-tighter text-slate-300">RUPIAH INDONESIA</span>
-                                </div>
-                            </template>
+                            <TrashIcon class="w-5 h-5" />
+                        </button>
+                    </template>
 
-                            <template #cell-status="{ row }">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                    <span class="text-xs text-slate-500 font-bold italic">{{ row.verified_by?.name || 'Sistem' }}</span>
-                                </div>
-                            </template>
-                            
-                            <template #cell-actions="{ row }">
-                                <button 
-                                    @click="deleteTransaction(row.id)"
-                                    class="p-2.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                                    title="Hapus"
-                                >
-                                    <TrashIcon class="w-5 h-5" />
-                                </button>
-                            </template>
+                     <template #empty>
+                        <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                            <MagnifyingGlassIcon class="w-16 h-16 mb-4 opacity-50" />
+                            <p class="text-lg font-medium text-slate-600">Belum ada data transaksi</p>
+                            <p class="text-sm">Silahkan tambah transaksi baru atau ubah filter pencarian.</p>
+                        </div>
+                    </template>
 
-                             <template #empty>
-                                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
-                                    <div class="p-6 bg-slate-50 rounded-full mb-4">
-                                        <MagnifyingGlassIcon class="w-12 h-12 opacity-20" />
-                                    </div>
-                                    <p class="text-xl font-black text-slate-800">Tidak ada transaksi</p>
-                                    <p class="text-slate-400 font-medium max-w-xs text-center mt-2">Belum ada catatan keuangan untuk periode ini.</p>
-                                </div>
-                            </template>
-
-                            <template #pagination>
-                                <div class="pt-6">
-                                    <Pagination :links="transactions.links" />
-                                </div>
-                            </template>
-                        </ModernTable>
-                    </div>
-                </div>
+                    <template #pagination>
+                        <Pagination :links="transactions.links" />
+                    </template>
+                </ModernTable>
 
             </div>
         </div>
 
         <!-- Create Modal -->
-        <Modal :show="showCreateModal" maxWidth="2xl" @close="showCreateModal = false">
-            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl">
-                <!-- Modal Header -->
-                <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-emerald-100 text-emerald-600 p-3 rounded-2xl">
-                            <BanknotesIcon class="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-black text-slate-900 leading-none">Catat Transaksi Baru</h2>
-                            <p class="text-sm text-slate-500 font-medium mt-1">Input data pemasukan atau pengeluaran masjid.</p>
-                        </div>
-                    </div>
-                    <button @click="showCreateModal = false" class="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-                        <XMarkIcon class="w-6 h-6 text-slate-400" />
-                    </button>
+        <Modal :show="showCreateModal" @close="showCreateModal = false">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">Input Transaksi Baru</h3>
+                     <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
                 </div>
 
-                 <form @submit.prevent="submitCreate" class="p-8 space-y-8">
+                 <form @submit.prevent="submitCreate" class="space-y-4">
                         <!-- Type Selection -->
-                        <div class="space-y-2">
-                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Tipe Transaksi</label>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tipe Transaksi</label>
                             <div class="flex gap-4">
-                                <label class="flex-1 flex items-center justify-center gap-3 cursor-pointer p-5 border-2 rounded-[2rem] transition-all group" :class="form.type === 'income' ? 'border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-50' : 'border-slate-100 bg-slate-50/50 hover:bg-white'">
+                                <label class="flex items-center cursor-pointer p-3 border rounded-lg hover:bg-emerald-50 peer-checked:bg-emerald-50 transition w-full" :class="form.type === 'income' ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500' : 'border-slate-200'">
                                     <input v-model="form.type" type="radio" value="income" class="hidden" />
-                                    <div :class="form.type === 'income' ? 'bg-emerald-500' : 'bg-slate-200'" class="w-5 h-5 rounded-full flex items-center justify-center p-1 transition-all">
-                                        <div class="w-full h-full bg-white rounded-full"></div>
-                                    </div>
-                                    <span class="font-black text-sm uppercase tracking-widest" :class="form.type === 'income' ? 'text-emerald-700': 'text-slate-400'">Pemasukan</span>
+                                    <span class="text-sm font-medium" :class="form.type === 'income' ? 'text-emerald-700': 'text-slate-600'">💰 Pemasukan</span>
                                 </label>
-                                <label class="flex-1 flex items-center justify-center gap-3 cursor-pointer p-5 border-2 rounded-[2rem] transition-all group" :class="form.type === 'expense' ? 'border-rose-500 bg-rose-50 shadow-lg shadow-rose-50' : 'border-slate-100 bg-slate-50/50 hover:bg-white'">
+                                <label class="flex items-center cursor-pointer p-3 border rounded-lg hover:bg-rose-50 peer-checked:bg-rose-50 transition w-full" :class="form.type === 'expense' ? 'border-rose-500 bg-rose-50 ring-1 ring-rose-500' : 'border-slate-200'">
                                     <input v-model="form.type" type="radio" value="expense" class="hidden" />
-                                    <div :class="form.type === 'expense' ? 'bg-rose-500' : 'bg-slate-200'" class="w-5 h-5 rounded-full flex items-center justify-center p-1 transition-all">
-                                        <div class="w-full h-full bg-white rounded-full"></div>
-                                    </div>
-                                    <span class="font-black text-sm uppercase tracking-widest" :class="form.type === 'expense' ? 'text-rose-700': 'text-slate-400'">Pengeluaran</span>
+                                    <span class="text-sm font-medium" :class="form.type === 'expense' ? 'text-rose-700': 'text-slate-600'">💸 Pengeluaran</span>
                                 </label>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-6">
-                                <!-- Category -->
-                                <div class="space-y-1.5">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Kategori</label>
-                                    <select v-model="form.category" class="w-full rounded-2xl border-slate-200 py-3.5 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 transition-all">
-                                        <option value="">Pilih Kategori</option>
-                                        <option v-for="cat in categories[form.type]" :key="cat" :value="cat">{{ cat }}</option>
-                                    </select>
-                                    <p v-if="form.errors.category" class="text-rose-500 text-[10px] font-bold">{{ form.errors.category }}</p>
-                                </div>
+                        <!-- Category -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Kategori</label>
+                            <select v-model="form.category" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700">
+                                <option value="">Pilih Kategori</option>
+                                <option v-for="cat in categories[form.type]" :key="cat" :value="cat">{{ cat }}</option>
+                            </select>
+                            <p v-if="form.errors.category" class="mt-1 text-xs text-red-600">{{ form.errors.category }}</p>
+                        </div>
 
-                                <!-- Amount -->
-                                <div class="space-y-1.5">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Jumlah (Rp)</label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 font-black text-sm">Rp</div>
-                                        <input v-model="form.amount" type="number" min="0" class="w-full rounded-2xl border-slate-200 py-3.5 pl-12 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-black bg-slate-50/50 hover:bg-white transition-all text-lg" placeholder="100.000" />
-                                    </div>
-                                    <p v-if="form.errors.amount" class="text-rose-500 text-[10px] font-bold">{{ form.errors.amount }}</p>
-                                </div>
-
-                                <!-- Date -->
-                                <div class="space-y-1.5">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Tanggal</label>
-                                    <input v-model="form.date" type="date" class="w-full rounded-2xl border-slate-200 py-3.5 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 hover:bg-white transition-all" />
-                                    <p v-if="form.errors.date" class="text-rose-500 text-[10px] font-bold">{{ form.errors.date }}</p>
-                                </div>
+                        <!-- Amount & Date -->
+                         <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Jumlah (Rp)</label>
+                                <input v-model="form.amount" type="number" min="0" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700" placeholder="Contoh: 500000" />
+                                <p v-if="form.errors.amount" class="mt-1 text-xs text-red-600">{{ form.errors.amount }}</p>
                             </div>
-
-                            <div class="space-y-6">
-                                <!-- Description -->
-                                <div class="space-y-1.5">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Keterangan</label>
-                                    <textarea v-model="form.description" rows="4" class="w-full rounded-2xl border-slate-200 py-3 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 hover:bg-white transition-all" placeholder="Catatan tambahan..."></textarea>
-                                    <p v-if="form.errors.description" class="text-rose-500 text-[10px] font-bold">{{ form.errors.description }}</p>
-                                </div>
-
-                                <!-- Proof Image -->
-                                <div v-if="form.type === 'expense'" class="space-y-2">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Bukti Nota/Kuitansi</label>
-                                    <div class="relative group aspect-video bg-slate-50 rounded-[2rem] overflow-hidden border-2 border-dashed border-slate-200 hover:border-emerald-400 transition-all flex items-center justify-center">
-                                        <img v-if="imagePreview" :src="imagePreview" class="w-full h-full object-cover" />
-                                        <div v-if="imagePreview" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <button type="button" @click="$refs.proofInput.click()" class="bg-white h-10 w-10 rounded-full shadow-lg flex items-center justify-center text-slate-600 hover:scale-110 transition-transform">
-                                                <ArrowUpTrayIcon class="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                        <label v-else @click="$refs.proofInput.click()" class="flex flex-col items-center justify-center cursor-pointer gap-2">
-                                            <div class="p-3 bg-white rounded-xl shadow-sm text-slate-300 group-hover:text-emerald-500 transition-colors">
-                                                <PhotoIcon class="w-8 h-8" />
-                                            </div>
-                                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unggah Bukti</span>
-                                        </label>
-                                        <input ref="proofInput" type="file" @change="handleFileChange" accept="image/*,.pdf" class="hidden">
-                                    </div>
-                                    <p v-if="form.errors.proof_image" class="text-rose-500 text-[10px] font-bold">{{ form.errors.proof_image }}</p>
-                                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
+                                <input v-model="form.date" type="date" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700" />
+                                <p v-if="form.errors.date" class="mt-1 text-xs text-red-600">{{ form.errors.date }}</p>
                             </div>
                         </div>
 
-                        <!-- Modal Footer -->
-                        <div class="pt-8 border-t border-slate-100 flex justify-end gap-4">
-                            <button type="button" @click="showCreateModal = false" class="px-8 py-3.5 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all active:scale-95">
-                                Batal
-                            </button>
-                            <button type="submit" :disabled="form.processing" class="px-10 py-3.5 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-100 hover:bg-emerald-700 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2">
-                                <span v-if="form.processing" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                                <CheckCircleIcon class="w-5 h-5 stroke-2" />
-                                Simpan Transaksi
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Keterangan</label>
+                            <textarea v-model="form.description" rows="2" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700" placeholder="Detail transaksi..."></textarea>
+                            <p v-if="form.errors.description" class="mt-1 text-xs text-red-600">{{ form.errors.description }}</p>
+                        </div>
+
+                        <!-- Proof Image -->
+                        <div v-if="form.type === 'expense'" class="border border-dashed border-amber-300 rounded-lg p-4 bg-amber-50">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">📸 Bukti (Wajib untuk pengeluaran)</label>
+                            <input ref="fileInput" type="file" @change="handleFileChange" accept="image/*,.pdf" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+                            <p v-if="form.errors.proof_image" class="mt-1 text-xs text-red-600">{{ form.errors.proof_image }}</p>
+                            <div v-if="imagePreview" class="mt-2">
+                                <img :src="imagePreview" class="h-20 rounded shadow-sm" />
+                            </div>
+                        </div>
+
+                        <div class="pt-4 flex justify-end gap-3">
+                            <button type="button" @click="showCreateModal = false" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Batal</button>
+                            <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-md transition-colors flex items-center gap-2">
+                                <span v-if="form.processing" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                                Simpan
                             </button>
                         </div>
                  </form>
@@ -421,14 +359,9 @@ const formatCurrency = (val) => {
 
         <!-- Toast -->
         <Transition name="fade">
-            <div v-if="toast.show.value" :class="['fixed bottom-8 right-8 z-50 px-8 py-5 rounded-[2rem] shadow-2xl max-w-sm flex items-center gap-4 transform transition-all', toast.type.value === 'success' ? 'bg-slate-900 text-white' : 'bg-rose-600 text-white']">
-                <div :class="toast.type.value === 'success' ? 'bg-emerald-500' : 'bg-white/20'" class="p-2 rounded-xl">
-                    <CheckCircleIcon v-if="toast.type.value === 'success'" class="w-6 h-6 text-white" />
-                    <XMarkIcon v-else class="w-6 h-6 text-white" />
-                </div>
-                <div>
-                    <p class="font-black text-sm tracking-tight leading-tight">{{ toast.message.value }}</p>
-                </div>
+            <div v-if="toast.show.value" :class="['fixed bottom-4 right-4 z-50 px-6 py-4 rounded-lg shadow-xl max-w-sm flex items-center gap-3', toast.type.value === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white']">
+                <span class="text-xl">{{ toast.type.value === 'success' ? '✅' : '❌' }}</span>
+                <p class="font-medium text-sm">{{ toast.message.value }}</p>
             </div>
         </Transition>
 
@@ -436,6 +369,6 @@ const formatCurrency = (val) => {
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(2rem) scale(0.95); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }
 </style>

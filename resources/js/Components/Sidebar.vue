@@ -16,7 +16,10 @@ import {
     UsersIcon,
     PaintBrushIcon,
     GiftIcon,
-    CakeIcon
+    CakeIcon,
+    AcademicCapIcon,
+    HeartIcon,
+    BuildingOfficeIcon
 } from '@heroicons/vue/24/outline';
 
 const page = usePage();
@@ -38,7 +41,7 @@ const menuGroups = computed(() => {
     ];
 
     // Approvals
-    if (['ketua', 'super_admin'].includes(role)) {
+    if (['ketua', 'super_admin', 'admin'].includes(role)) {
         groups.push({
             title: 'Persetujuan',
             items: [
@@ -48,12 +51,11 @@ const menuGroups = computed(() => {
     }
     
     // Keuangan
-    if (['bendahara', 'super_admin'].includes(role)) {
+    if (['bendahara', 'super_admin', 'admin'].includes(role)) {
         groups.push({
             title: 'Keuangan & Sosial',
             items: [
-                { name: 'Keuangan', route: 'keuangan.index', icon: BanknotesIcon, visible: true },
-                { name: 'Input Transaksi', route: 'transactions.index', icon: PencilSquareIcon, visible: true },
+                { name: 'Transaksi', route: 'transactions.index', icon: BanknotesIcon, visible: true },
                 { name: 'Zakat', route: 'zakat.index', icon: GiftIcon, visible: true },
                 { name: 'Qurban', route: 'qurban.index', icon: CakeIcon, visible: true }
             ]
@@ -61,14 +63,17 @@ const menuGroups = computed(() => {
     }
 
     // Operasional
-    if (['marbot', 'super_admin'].includes(role)) {
+    if (['marbot', 'super_admin', 'admin', 'ketua'].includes(role)) {
         groups.push({
             title: 'Operasional Masjid',
             items: [
+                { name: 'Fasilitas & Booking', route: 'facilities.index', icon: BuildingOfficeIcon, visible: true },
+                { name: 'Lumbung Pangan', route: 'lumbung-pangan.index', icon: HeartIcon, visible: true },
                 { name: 'Jadwal Jumat', route: 'friday-schedules.index', icon: CalendarDaysIcon, visible: true },
                 { name: 'Kelola Agenda', route: 'agendas.index', icon: CalendarIcon, visible: true },
                 { name: 'Kelola Slide TV', route: 'slides.index', icon: PresentationChartBarIcon, visible: true },
                 { name: 'Inventaris Aset', route: 'assets.index', icon: ArchiveBoxIcon, visible: true },
+                { name: 'Kebutuhan Masjid', route: 'wishlists.index', icon: GiftIcon, visible: true },
                 { name: 'TV Display', route: 'display.index', icon: TvIcon, visible: true, external: true }
             ]
         });
@@ -79,7 +84,8 @@ const menuGroups = computed(() => {
         groups.push({
             title: 'Publikasi',
             items: [
-                { name: 'Berita & Kegiatan', route: 'posts.index', icon: NewspaperIcon, visible: true }
+                { name: 'Berita & Kegiatan', route: 'posts.index', icon: NewspaperIcon, visible: true },
+                { name: 'Kelola Kajian', route: 'lectures.index', icon: AcademicCapIcon, visible: true }
             ]
         });
     }
@@ -102,9 +108,9 @@ const menuGroups = computed(() => {
 </script>
 
 <template>
-    <nav class="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 w-64 min-h-screen flex flex-col">
+    <nav class="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 w-64 h-full flex flex-col overflow-hidden">
         <!-- User Info Compact -->
-        <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-islamic">
                     {{ user.name.charAt(0) }}
@@ -119,7 +125,7 @@ const menuGroups = computed(() => {
         </div>
         
         <!-- Menu Scroll Area -->
-        <div class="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar overscroll-contain">
             <div v-for="group in menuGroups" :key="group.title" class="mb-6 last:mb-0">
                 <div class="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                     {{ group.title }}
@@ -173,7 +179,7 @@ const menuGroups = computed(() => {
         </div>
 
         <!-- Role Badge Footer -->
-        <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
             <div class="flex items-center justify-between text-[11px]">
                 <span class="text-slate-500 dark:text-slate-400">Access Level</span>
                 <span class="font-bold text-emerald-600 dark:text-emerald-400">
@@ -185,6 +191,9 @@ const menuGroups = computed(() => {
 </template>
 
 <style scoped>
+.custom-scrollbar {
+    overscroll-behavior: contain;
+}
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }

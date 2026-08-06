@@ -59,7 +59,7 @@ class PostController extends Controller
             'image_path' => $imagePath,
             'cloudinary_public_id' => $cloudinaryPublicId,
             'is_published' => $validated['is_published'] ?? false,
-            'published_at' => $validated['published_at'] ?? (($validated['is_published'] ?? false) ? now() : null),
+            'published_at' => !empty($validated['published_at']) ? $validated['published_at'] : (($validated['is_published'] ?? false) ? now() : null),
             'author_id' => auth()->id(),
         ]);
 

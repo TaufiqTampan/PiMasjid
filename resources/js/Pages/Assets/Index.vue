@@ -78,7 +78,7 @@ const columns = [
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+                <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                     🏛️ Inventaris Aset Masjid
                 </h2>
                 <div class="flex gap-2">
@@ -101,19 +101,19 @@ const columns = [
                 <!-- Create/Edit Form -->
                 <Card v-if="showForm" padding="lg">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold">{{ editingAsset ? 'Edit Aset' : 'Tambah Aset Baru' }}</h3>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ editingAsset ? 'Edit Aset' : 'Tambah Aset Baru' }}</h3>
                         <button @click="showForm = false" class="text-slate-400 hover:text-slate-600">✕</button>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Nama Aset *</label>
-                            <input v-model="form.name" type="text" class="w-full rounded-lg border-slate-300" />
+                            <label class="block text-sm text-slate-700 dark:text-slate-300">Nama Aset *</label>
+                            <input v-model="form.name" type="text" class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-1">Kondisi *</label>
-                            <select v-model="form.condition" class="w-full rounded-lg border-slate-300">
+                            <label class="block text-sm text-slate-700 dark:text-slate-300">Kondisi *</label>
+                            <select v-model="form.condition" class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                                 <option value="good">Baik</option>
                                 <option value="damaged">Rusak</option>
                                 <option value="lost">Hilang</option>
@@ -121,23 +121,23 @@ const columns = [
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-1">Jumlah *</label>
-                            <input v-model="form.quantity" type="number" min="1" class="w-full rounded-lg border-slate-300" />
+                            <label class="block text-sm text-slate-700 dark:text-slate-300">Jumlah *</label>
+                            <input v-model="form.quantity" type="number" min="1" class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-1">Tanggal Pembelian</label>
-                            <input v-model="form.purchase_date" type="date" class="w-full rounded-lg border-slate-300" />
+                            <label class="block text-sm text-slate-700 dark:text-slate-300">Tanggal Pembelian</label>
+                            <input v-model="form.purchase_date" type="date" class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-1">Harga Pembelian</label>
-                            <input v-model="form.purchase_price" type="number" min="0" class="w-full rounded-lg border-slate-300" placeholder="Rp" />
+                            <label class="block text-sm text-slate-700 dark:text-slate-300">Harga Pembelian</label>
+                            <input v-model="form.purchase_price" type="number" min="0" class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" placeholder="Rp" />
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-1">Catatan</label>
-                            <textarea v-model="form.notes" rows="2" class="w-full rounded-lg border-slate-300"></textarea>
+                            <label class="block text-sm text-slate-700 dark:text-slate-300">Catatan</label>
+                            <textarea v-model="form.notes" rows="2" class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"></textarea>
                         </div>
                     </div>
 

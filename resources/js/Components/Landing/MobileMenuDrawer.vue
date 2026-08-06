@@ -10,7 +10,8 @@ import {
     HeartIcon,
     ClockIcon,
     CalendarIcon,
-    PhoneIcon
+    PhoneIcon,
+    AcademicCapIcon
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -49,7 +50,8 @@ const menuSections = [
         items: [
             { label: 'Jadwal Sholat', href: '/ibadah/jadwal', icon: ClockIcon },
             { label: 'Agenda Kegiatan', href: '/ibadah/agenda', icon: CalendarIcon },
-            { label: 'Jadwal Jumat', href: '/ibadah/jumat', icon: CalendarIcon }
+            { label: 'Jadwal Jumat', href: '/ibadah/jumat', icon: CalendarIcon },
+            { label: 'Tarbiyah & Kajian', href: '/tarbiyah', icon: AcademicCapIcon }
         ]
     }
 ];

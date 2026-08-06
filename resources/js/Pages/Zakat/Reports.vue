@@ -40,7 +40,7 @@ const asnafLabels = {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                 📊 Laporan Zakat
             </h2>
         </template>
@@ -49,7 +49,7 @@ const asnafLabels = {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <!-- Year Filter -->
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <h3 class="text-xl font-semibold text-slate-800">Laporan Tahun {{ yearFilter }}</h3>
+                    <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Laporan Tahun {{ yearFilter }}</h3>
                     
                     <div class="flex items-center gap-4">
                         <div class="flex gap-2 items-center">
@@ -96,8 +96,8 @@ const asnafLabels = {
 
                 <!-- Distribution Summary -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h4 class="font-semibold text-slate-800 mb-4">Ringkasan Penyaluran</h4>
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6">
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-4">Ringkasan Penyaluran</h4>
                         <div class="space-y-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-slate-600">Total Terkumpul:</span>
@@ -108,14 +108,14 @@ const asnafLabels = {
                                 <span class="font-semibold text-blue-600">{{ formatRupiah(summary.total_distributed) }}</span>
                             </div>
                             <div class="flex justify-between items-center pt-3 border-t">
-                                <span class="text-slate-800 font-medium">Sisa:</span>
+                                <span class="text-slate-800 dark:text-slate-100 font-medium">Sisa:</span>
                                 <span class="font-bold text-purple-600">{{ formatRupiah(summary.remaining) }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h4 class="font-semibold text-slate-800 mb-4">Penyaluran per Asnaf</h4>
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6">
+                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-4">Penyaluran per Asnaf</h4>
                         <div class="space-y-2">
                             <div v-for="dist in distribution_by_asnaf" :key="dist.mustahik_category"
                                  class="flex justify-between items-center text-sm">
@@ -130,8 +130,8 @@ const asnafLabels = {
                 </div>
 
                 <!-- Charts Placeholder -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h4 class="font-semibold text-slate-800 mb-4">Visualisasi Data</h4>
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6">
+                    <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-4">Visualisasi Data</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Pie Chart Placeholder -->
                         <div class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">

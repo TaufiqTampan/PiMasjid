@@ -31,13 +31,28 @@ class DisplayController extends Controller
         $fridaySchedule = null;
         
         if ($isFriday) {
-            // Get Friday prayer schedule (mock for now, can be replaced with DB)
-            $fridaySchedule = [
-                'date' => $this->getNextFriday(),
-                'khatib' => 'Ustadz Ahmad Dahlan, Lc',
-                'imam' => 'H. Muhammad Ridwan',
-                'muadzin' => 'Sdr. Ali Rahman',
-            ];
+            $today = now();
+            $schedule = \App\Models\FridaySchedule::whereDate('date', $today)->first();
+            if ($schedule) {
+                $fridaySchedule = [
+                    'date'    => $schedule->date->translatedFormat('d F Y'),
+                    'time'    => \Carbon\Carbon::parse($schedule->time)->format('H:i'),
+                    'khatib'  => $schedule->khatib,
+                    'imam'    => $schedule->imam,
+                    'muadzin' => $schedule->muadzin,
+                    'bilal'   => $schedule->bilal ?? '-',
+                    'title'   => $schedule->title ?? null,
+                ];
+            } else {
+                $fridaySchedule = [
+                    'date'    => $today->translatedFormat('d F Y'),
+                    'time'    => '12:00',
+                    'khatib'  => '-',
+                    'imam'    => '-',
+                    'muadzin' => '-',
+                    'bilal'   => '-',
+                ];
+            }
         }
         
         // Get active slides ordered by sequence
@@ -86,7 +101,7 @@ class DisplayController extends Controller
             'currentTime' => $now->toIso8601String(),
             'todayPrayerTimes' => $todayPrayerTimes ? [
                 'date' => $now->translatedFormat('l, d F Y'),
-                'hijri_date' => null, // Can be enhanced later with Hijri API
+                'hijri_date' => $todayPrayerTimes['hijri_date'] ?? null,
                 'subuh' => $todayPrayerTimes['Subuh'] ?? '04:30',
                 'sunrise' => $todayPrayerTimes['Sunrise'] ?? '05:45',
                 'dhuhr' => $todayPrayerTimes['Dzuhur'] ?? '12:05',
@@ -105,6 +120,18 @@ class DisplayController extends Controller
                 'balance' => number_format($monthlyIncome - $monthlyExpense, 0, ',', '.'),
             ],
             'wishlists' => $wishlists,
+            'displaySettings' => [
+                'running_text' => setting('display_running_text', 'Selamat datang di ' . setting('site_name', 'MasjidVision') . '. Mohon heningkan HP Anda di area sholat. Luruskan & rapatkan shaf.'),
+                'iqamah_subuh' => (int) setting('iqamah_duration_subuh', 10),
+                'iqamah_dhuhr' => (int) setting('iqamah_duration_dhuhr', 10),
+                'iqamah_asr' => (int) setting('iqamah_duration_asr', 10),
+                'iqamah_maghrib' => (int) setting('iqamah_duration_maghrib', 7),
+                'iqamah_isha' => (int) setting('iqamah_duration_isha', 10),
+                'adhan_duration' => (int) setting('adhan_duration', 3),
+                'sholat_duration' => (int) setting('sholat_duration', 15),
+                'site_name' => setting('site_name', 'MasjidVision'),
+                'site_address' => setting('address', 'Jl. Masjid Raya'),
+            ],
         ]);
     }
     
@@ -127,6 +154,15 @@ class DisplayController extends Controller
 
             if ($response->successful()) {
                 $timings = $response->json('data.timings');
+                $hijriData = $response->json('data.date.hijri');
+                $hijriFormatted = null;
+                if ($hijriData) {
+                    $day = $hijriData['day'] ?? '';
+                    $month = $hijriData['month']['en'] ?? '';
+                    $year = $hijriData['year'] ?? '';
+                    $hijriFormatted = trim("$day $month $year H");
+                }
+
                 return [
                     'Subuh' => $timings['Fajr'],
                     'Sunrise' => $timings['Sunrise'],
@@ -134,7 +170,8 @@ class DisplayController extends Controller
                     'Ashar' => $timings['Asr'],
                     'Maghrib' => $timings['Maghrib'],
                     'Isya' => $timings['Isha'],
-                    'date' => now()->translatedFormat('l, d F Y')
+                    'date' => now()->translatedFormat('l, d F Y'),
+                    'hijri_date' => $hijriFormatted,
                 ];
             }
         } catch (\Exception $e) {
@@ -149,7 +186,8 @@ class DisplayController extends Controller
             'Ashar' => '15:20',
             'Maghrib' => '18:10',
             'Isya' => '19:25',
-            'date' => now()->translatedFormat('l, d F Y')
+            'date' => now()->translatedFormat('l, d F Y'),
+            'hijri_date' => null,
         ];
     }
     

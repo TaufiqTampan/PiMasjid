@@ -50,7 +50,7 @@ const submit = () => {
 
         <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <InputLabel for="email" value="Email" class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5 ml-1" />
+                <InputLabel for="email" value="Email" class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1.5 ml-1" />
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary-500 transition-colors">
                         <EnvelopeIcon class="h-5 w-5" />
@@ -71,7 +71,7 @@ const submit = () => {
 
             <div>
                 <div class="flex items-center justify-between mb-1.5 ml-1">
-                    <InputLabel for="password" value="Password" class="text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                    <InputLabel for="password" value="Password" class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400" />
                     <Link
                         v-if="canResetPassword"
                         :href="route('password.request')"

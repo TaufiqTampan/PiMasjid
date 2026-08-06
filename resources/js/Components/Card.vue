@@ -34,9 +34,9 @@ const paddingClasses = computed(() => {
 
 const variantClasses = computed(() => {
     const variants = {
-        default: 'bg-white border-slate-100',
-        islamic: 'bg-gradient-to-br from-primary-50 to-white border-primary-200',
-        gold: 'bg-gradient-to-br from-secondary-50 to-white border-secondary-200',
+        default: 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700',
+        islamic: 'bg-gradient-to-br from-primary-50 to-white dark:from-slate-900 dark:to-slate-800 border-primary-200 dark:border-slate-700',
+        gold: 'bg-gradient-to-br from-secondary-50 to-white dark:from-slate-900 dark:to-slate-800 border-secondary-200 dark:border-slate-700',
     };
     return variants[props.variant];
 });

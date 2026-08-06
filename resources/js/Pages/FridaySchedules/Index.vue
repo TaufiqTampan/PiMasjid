@@ -100,7 +100,7 @@ const columns = [
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-slate-800 leading-tight">
+                <h2 class="font-semibold text-xl leading-tight text-slate-900 dark:text-white">
                     🕌 Manajemen Jadwal Jumat
                 </h2>
                 <button 
@@ -168,7 +168,7 @@ const columns = [
         <Modal :show="showModal" @close="showModal = false">
             <div class="p-6">
                  <div class="flex justify-between items-center mb-6">
-                     <h3 class="text-lg font-bold text-slate-900">
+                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">
                         {{ isEditing ? 'Edit Jadwal Jumat' : 'Tambah Jadwal Jumat' }}
                      </h3>
                      <button @click="showModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
@@ -178,12 +178,12 @@ const columns = [
                     <!-- Date & Time -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
                             <input v-model="form.date" type="date" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" />
                             <p v-if="form.errors.date" class="mt-1 text-xs text-red-600">{{ form.errors.date }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Jam</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Jam</label>
                             <input v-model="form.time" type="time" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" />
                             <p v-if="form.errors.time" class="mt-1 text-xs text-red-600">{{ form.errors.time }}</p>
                         </div>
@@ -192,22 +192,22 @@ const columns = [
                     <!-- Officers -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Khatib</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Khatib</label>
                             <input v-model="form.khatib" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" placeholder="Nama Khatib" />
                             <p v-if="form.errors.khatib" class="mt-1 text-xs text-red-600">{{ form.errors.khatib }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Imam</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Imam</label>
                             <input v-model="form.imam" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" placeholder="Nama Imam" />
                             <p v-if="form.errors.imam" class="mt-1 text-xs text-red-600">{{ form.errors.imam }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Muadzin</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Muadzin</label>
                             <input v-model="form.muadzin" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" placeholder="Nama Muadzin" />
                             <p v-if="form.errors.muadzin" class="mt-1 text-xs text-red-600">{{ form.errors.muadzin }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Bilal</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bilal</label>
                             <input v-model="form.bilal" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" placeholder="Nama Bilal" />
                             <p v-if="form.errors.bilal" class="mt-1 text-xs text-red-600">{{ form.errors.bilal }}</p>
                         </div>
@@ -215,7 +215,7 @@ const columns = [
 
                     <!-- Title -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Topik / Judul Khutbah (Opsional)</label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Topik / Judul Khutbah (Opsional)</label>
                         <input v-model="form.title" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm" placeholder="Contoh: Keutamaan Bulan Rajab" />
                         <p v-if="form.errors.title" class="mt-1 text-xs text-red-600">{{ form.errors.title }}</p>
                     </div>

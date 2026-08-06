@@ -11,10 +11,7 @@ import {
     PencilSquareIcon, 
     TrashIcon,
     MagnifyingGlassIcon,
-    PhotoIcon,
-    UserGroupIcon,
-    XMarkIcon,
-    CheckCircleIcon
+    PhotoIcon
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -52,8 +49,6 @@ const openCreateModal = () => {
     editingId.value = null;
     previewImage.value = null;
     form.reset();
-    // Auto-arrange order for new members
-    form.order = (props.members.total || 0) + 1;
     form.clearErrors();
     showModal.value = true;
 };
@@ -66,7 +61,7 @@ const openEditModal = (member) => {
     form.division = member.division;
     form.order = member.order;
     form.is_active = !!member.is_active;
-    form.photo = null;
+    form.photo = null; // Don't preset file input
     previewImage.value = member.photo_url;
     form.clearErrors();
     showModal.value = true;
@@ -113,8 +108,9 @@ const deleteMember = (id) => {
 };
 
 const columns = [
-    { key: 'photo', label: 'Profil' },
-    { key: 'name', label: 'Informasi Pengurus' },
+    { key: 'photo', label: 'Foto' },
+    { key: 'name', label: 'Nama' },
+    { key: 'position', label: 'Jabatan' },
     { key: 'division', label: 'Bidang' },
     { key: 'order', label: 'Urutan' },
     { key: 'status', label: 'Status' },
@@ -128,19 +124,14 @@ const columns = [
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-emerald-100 rounded-xl">
-                        <UserGroupIcon class="w-6 h-6 text-emerald-600" />
-                    </div>
-                    <h2 class="font-black text-2xl text-slate-800 leading-tight">
-                        Struktur Pengurus
-                    </h2>
-                </div>
+                <h2 class="font-bold text-2xl leading-tight text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>👥</span> Struktur Pengurus
+                </h2>
                 <button 
                     @click="openCreateModal"
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                    class="btn-primary flex items-center justify-center gap-2 px-4 py-2 rounded-lg shadow hover:shadow-md transition-all"
                 >
-                    <PlusIcon class="w-5 h-5 stroke-2" />
+                    <PlusIcon class="w-5 h-5" />
                     <span>Tambah Pengurus</span>
                 </button>
             </div>
@@ -149,176 +140,131 @@ const columns = [
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 
-                <div class="bg-white overflow-hidden shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100">
-                    <div class="p-8">
-                        <ModernTable
-                            :columns="columns"
-                            :data="members.data"
+                <ModernTable
+                    :columns="columns"
+                    :data="members.data"
+                >
+                    <template #cell-photo="{ row }">
+                        <img :src="row.photo_url" :alt="row.name" class="w-10 h-10 rounded-full object-cover border border-slate-200" />
+                    </template>
+                    
+                    <template #cell-status="{ row }">
+                        <span 
+                            class="px-2 py-1 text-xs font-bold rounded-full"
+                            :class="row.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'"
                         >
-                            <template #cell-photo="{ row }">
-                                <div class="relative w-12 h-12 rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-                                    <img :src="row.photo_url" :alt="row.name" class="w-full h-full object-cover" />
-                                </div>
-                            </template>
+                            {{ row.is_active ? 'Aktif' : 'Non-Aktif' }}
+                        </span>
+                    </template>
 
-                            <template #cell-name="{ row }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-slate-800">{{ row.name }}</span>
-                                    <span class="text-xs text-slate-500 font-medium italic">{{ row.position }}</span>
-                                </div>
-                            </template>
-                            
-                            <template #cell-division="{ value }">
-                                <span class="px-3 py-1 bg-slate-50 text-slate-600 rounded-lg text-xs font-bold border border-slate-100">
-                                    {{ value }}
-                                </span>
-                            </template>
+                    <template #cell-actions="{ row }">
+                        <div class="flex gap-2">
+                            <button 
+                                @click="openEditModal(row)"
+                                class="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Edit"
+                            >
+                                <PencilSquareIcon class="w-5 h-5" />
+                            </button>
+                            <button 
+                                @click="deleteMember(row.id)"
+                                class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                                title="Hapus"
+                            >
+                                <TrashIcon class="w-5 h-5" />
+                            </button>
+                        </div>
+                    </template>
 
-                            <template #cell-order="{ value }">
-                                <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-100">
-                                    {{ value }}
-                                </div>
-                            </template>
-                            
-                            <template #cell-status="{ row }">
-                                <span 
-                                    class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm"
-                                    :class="row.is_active ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'"
-                                >
-                                    {{ row.is_active ? 'Aktif' : 'Off' }}
-                                </span>
-                            </template>
+                    <template #empty>
+                        <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+                            <MagnifyingGlassIcon class="w-16 h-16 mb-4 opacity-50" />
+                            <p class="text-lg font-medium text-slate-600">Belum ada data pengurus</p>
+                            <p class="text-sm">Silahkan tambah pengurus baru.</p>
+                        </div>
+                    </template>
 
-                            <template #cell-actions="{ row }">
-                                <div class="flex gap-1">
-                                    <button 
-                                        @click="openEditModal(row)"
-                                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                                        title="Edit"
-                                    >
-                                        <PencilSquareIcon class="w-5 h-5" />
-                                    </button>
-                                    <button 
-                                        @click="deleteMember(row.id)"
-                                        class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                                        title="Hapus"
-                                    >
-                                        <TrashIcon class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </template>
-
-                            <template #empty>
-                                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
-                                    <div class="p-6 bg-slate-50 rounded-full mb-4">
-                                        <UserGroupIcon class="w-12 h-12 opacity-20" />
-                                    </div>
-                                    <p class="text-xl font-black text-slate-800">Belum ada pengurus</p>
-                                    <p class="text-slate-400 font-medium max-w-xs text-center mt-2">Daftarkan pengurus masjid Anda untuk mulai mengelola struktur organisasi.</p>
-                                </div>
-                            </template>
-
-                             <template #pagination>
-                                <div class="pt-6">
-                                    <Pagination :links="members.links" />
-                                </div>
-                            </template>
-                        </ModernTable>
-                    </div>
-                </div>
+                     <template #pagination>
+                        <Pagination :links="members.links" />
+                    </template>
+                </ModernTable>
 
             </div>
         </div>
 
         <!-- Modal -->
-        <Modal :show="showModal" maxWidth="2xl" @close="showModal = false">
-            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl">
-                <!-- Modal Header -->
-                <div class="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-                    <div class="flex items-center gap-4">
-                        <div :class="isEditing ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'" class="p-3 rounded-2xl">
-                            <UserGroupIcon class="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-black text-slate-900 leading-none">
-                                {{ isEditing ? 'Edit Profil Pengurus' : 'Tambah Pengurus Baru' }}
-                            </h2>
-                            <p class="text-sm text-slate-500 font-medium mt-1">Lengkapi data profil dan jabatan pengurus masjid.</p>
-                        </div>
-                    </div>
-                    <button @click="showModal = false" class="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-                        <XMarkIcon class="w-6 h-6 text-slate-400" />
-                    </button>
+        <Modal :show="showModal" @close="showModal = false">
+            <div class="p-6">
+                 <div class="flex justify-between items-center mb-6">
+                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                        {{ isEditing ? 'Edit Pengurus' : 'Tambah Pengurus' }}
+                     </h3>
+                     <button @click="showModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
                 </div>
 
-                <form @submit.prevent="submitForm" class="p-8 space-y-8">
+                <form @submit.prevent="submitForm" class="space-y-4">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Left Side: Photo -->
-                        <div class="space-y-4">
-                             <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Foto Profil</label>
-                             <div class="relative group w-full aspect-square bg-slate-50 rounded-[2rem] overflow-hidden border-2 border-dashed border-slate-200 hover:border-emerald-400 transition-all flex items-center justify-center">
-                                <img v-if="previewImage" :src="previewImage" class="w-full h-full object-cover" />
-                                <div v-if="previewImage" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button type="button" @click="$refs.photoInput.click()" class="bg-white h-12 w-12 rounded-full shadow-lg flex items-center justify-center text-slate-600 hover:scale-110 transition-transform">
-                                        <PhotoIcon class="w-6 h-6" />
-                                    </button>
-                                </div>
-                                <label v-else @click="$refs.photoInput.click()" class="flex flex-col items-center justify-center cursor-pointer gap-2">
-                                    <div class="p-4 bg-white rounded-2xl shadow-sm text-slate-300 group-hover:text-emerald-500 transition-colors">
-                                        <UserGroupIcon class="w-10 h-10" />
-                                    </div>
-                                    <span class="text-xs font-black text-slate-400">Pilih Foto</span>
-                                </label>
-                                <input ref="photoInput" type="file" @change="handleImageUpload" accept="image/*" class="hidden">
-                             </div>
-                             <p v-if="form.errors.photo" class="text-rose-500 text-xs font-bold">{{ form.errors.photo }}</p>
+                    <!-- Photo Upload -->
+                    <div class="flex items-center gap-4">
+                        <div class="shrink-0 relative w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                            <img v-if="previewImage" :src="previewImage" class="w-full h-full object-cover" />
+                            <PhotoIcon v-else class="w-8 h-8 text-slate-400" />
                         </div>
-
-                        <!-- Right Side: Details -->
-                        <div class="space-y-5">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Nama Lengkap</label>
-                                <input v-model="form.name" type="text" required class="w-full rounded-2xl border-slate-200 py-3 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 hover:bg-white transition-all" placeholder="Misal: H. Ahmad Yani, S.Ag">
-                                <p v-if="form.errors.name" class="text-rose-500 text-[10px] font-bold">{{ form.errors.name }}</p>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Jabatan</label>
-                                <input v-model="form.position" type="text" required class="w-full rounded-2xl border-slate-200 py-3 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 hover:bg-white transition-all" placeholder="Contoh: Ketua DKM">
-                                <p v-if="form.errors.position" class="text-rose-500 text-[10px] font-bold">{{ form.errors.position }}</p>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-1.5">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Bidang</label>
-                                    <select v-model="form.division" class="w-full rounded-2xl border-slate-200 py-3 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 transition-all">
-                                        <option v-for="opt in divisionOptions" :key="opt" :value="opt">{{ opt }}</option>
-                                        <option value="Lainnya">Lainnya</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Urutan</label>
-                                    <input v-model="form.order" type="number" class="w-full rounded-2xl border-slate-200 py-3 text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-bold bg-slate-50/50 transition-all" />
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <input v-model="form.is_active" type="checkbox" id="is_active" class="w-6 h-6 border-slate-300 rounded-lg text-emerald-600 focus:ring-emerald-500 cursor-pointer" />
-                                <label for="is_active" class="text-sm font-black text-slate-700 cursor-pointer">Status Pengurus Aktif</label>
-                            </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Foto Profil</label>
+                            <input 
+                                type="file" 
+                                @change="handleImageUpload" 
+                                accept="image/*"
+                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-colors" 
+                            />
+                            <p v-if="form.errors.photo" class="mt-1 text-xs text-red-600">{{ form.errors.photo }}</p>
+                            <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG. Max: 2MB.</p>
                         </div>
                     </div>
 
-                    <!-- Modal Footer -->
-                    <div class="pt-8 border-t border-slate-100 flex justify-end gap-4">
-                        <button type="button" @click="showModal = false" class="px-8 py-3.5 bg-slate-100 text-slate-600 font-black rounded-2xl hover:bg-slate-200 transition-all active:scale-95">
-                            Batal
-                        </button>
-                        <button type="submit" :disabled="form.processing" class="px-10 py-3.5 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-100 hover:bg-emerald-700 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2">
-                             <span v-if="form.processing" class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                             <CheckCircleIcon class="w-5 h-5 stroke-2" />
-                             Simpan Pengurus
+                    <!-- Name & Position -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+                            <input v-model="form.name" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700" placeholder="Nama lengkap + gelar" />
+                            <p v-if="form.errors.name" class="mt-1 text-xs text-red-600">{{ form.errors.name }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Jabatan</label>
+                            <input v-model="form.position" type="text" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700" placeholder="Contoh: Ketua, Anggota" />
+                            <p v-if="form.errors.position" class="mt-1 text-xs text-red-600">{{ form.errors.position }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Division & Order -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bidang / Divisi</label>
+                            <select v-model="form.division" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700">
+                                <option v-for="opt in divisionOptions" :key="opt" :value="opt">{{ opt }}</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                            <p v-if="form.errors.division" class="mt-1 text-xs text-red-600">{{ form.errors.division }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Urutan Tampil</label>
+                            <input v-model="form.order" type="number" class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm bg-white text-slate-900 dark:bg-slate-800 dark:text-white dark:border-slate-700" />
+                            <p class="text-xs text-slate-500 mt-1">Semakin kecil angka, semakin di atas.</p>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="flex items-center gap-2">
+                         <input v-model="form.is_active" type="checkbox" id="is_active" class="rounded border-slate-300 text-emerald-600 shadow-sm focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                         <label for="is_active" class="text-sm text-slate-700 dark:text-slate-300 font-medium">Status Aktif</label>
+                    </div>
+
+                    <div class="pt-4 flex justify-end gap-3">
+                        <button type="button" @click="showModal = false" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Batal</button>
+                        <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-md transition-colors flex items-center gap-2">
+                            <span v-if="form.processing" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                            Simpan
                         </button>
                     </div>
 
@@ -328,14 +274,9 @@ const columns = [
 
         <!-- Toast -->
         <Transition name="fade">
-            <div v-if="toast.show.value" :class="['fixed bottom-8 right-8 z-50 px-8 py-5 rounded-[2rem] shadow-2xl max-w-sm flex items-center gap-4 transform transition-all', toast.type.value === 'success' ? 'bg-slate-900 text-white' : 'bg-rose-600 text-white']">
-                <div :class="toast.type.value === 'success' ? 'bg-emerald-500' : 'bg-white/20'" class="p-2 rounded-xl">
-                    <CheckCircleIcon v-if="toast.type.value === 'success'" class="w-6 h-6 text-white" />
-                    <XMarkIcon v-else class="w-6 h-6 text-white" />
-                </div>
-                <div>
-                    <p class="font-black text-sm tracking-tight leading-tight">{{ toast.message.value }}</p>
-                </div>
+            <div v-if="toast.show.value" :class="['fixed bottom-4 right-4 z-50 px-6 py-4 rounded-lg shadow-xl max-w-sm flex items-center gap-3', toast.type.value === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white']">
+                <span class="text-xl">{{ toast.type.value === 'success' ? '✅' : '❌' }}</span>
+                <p class="font-medium text-sm">{{ toast.message.value }}</p>
             </div>
         </Transition>
 
@@ -343,6 +284,6 @@ const columns = [
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(2rem) scale(0.95); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }
 </style>

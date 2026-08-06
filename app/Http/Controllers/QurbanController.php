@@ -29,10 +29,16 @@ class QurbanController extends Controller
         }
 
         // Filter by year
-        if ($request->filled('year')) {
-            $query->byYear($request->year);
+        $requestedYear = $request->input('year');
+        if ($request->filled('year') && $requestedYear != '') {
+            $query->byYear($requestedYear);
         } else {
-            $query->currentYear();
+            $latestYear = Qurban::max('year');
+            if ($latestYear) {
+                $query->byYear($latestYear);
+            } else {
+                $query->currentYear();
+            }
         }
 
         // Filter by status
@@ -64,7 +70,8 @@ class QurbanController extends Controller
         $qurbans = $query->paginate(20);
 
         // Summary statistics
-        $currentYear = $request->year ?? now()->year;
+        // Summary statistics
+        $currentYear = $request->filled('year') ? $request->year : (Qurban::max('year') ?? now()->year);
         
         $individualPrice = Qurban::byYear($currentYear)->where('is_shared', false)->sum('animal_price');
         $sharedPrice = Qurban::byYear($currentYear)
@@ -90,6 +97,7 @@ class QurbanController extends Controller
             'qurbans' => $qurbans,
             'summary' => $summary,
             'filters' => $request->only(['animal_type', 'year', 'status', 'share_type', 'search']),
+            'current_year' => $currentYear,
         ]);
     }
 
@@ -237,7 +245,7 @@ class QurbanController extends Controller
      */
     public function distribute(): Response
     {
-        $currentYear = now()->year;
+        $currentYear = Qurban::max('year') ?? now()->year;
         
         // Get slaughtered qurbans (ready for distribution)
         $availableQurbans = Qurban::byYear($currentYear)
@@ -312,7 +320,7 @@ class QurbanController extends Controller
      */
     public function reports(Request $request): Response
     {
-        $year = $request->input('year', now()->year);
+        $year = $request->input('year', Qurban::max('year') ?? now()->year);
         
         // Summary
         $qurbans = Qurban::byYear($year)->get();
@@ -395,7 +403,7 @@ class QurbanController extends Controller
      */
     public function export(Request $request)
     {
-        $year = $request->input('year', now()->year);
+        $year = $request->input('year', Qurban::max('year') ?? now()->year);
         $type = $request->input('type', 'pdf');
         
         $qurbans = Qurban::byYear($year)->orderByRaw('share_group_id DESC, share_position ASC, created_at DESC')->get();

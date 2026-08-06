@@ -69,7 +69,7 @@ const columns = [
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+                <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                     💰 Transparansi Keuangan Masjid
                 </h2>
                 <Link
@@ -125,7 +125,7 @@ const columns = [
 
                 <!-- Cashflow Chart -->
                 <Card padding="lg">
-                    <h3 class="text-xl font-bold text-slate-800 mb-6">📊 Grafik Arus Kas (6 Bulan Terakhir)</h3>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-6">📊 Grafik Arus Kas (6 Bulan Terakhir)</h3>
                     <div class="h-80">
                         <Bar :data="chartData" :options="chartOptions" />
                     </div>
@@ -134,7 +134,7 @@ const columns = [
                 <!-- Transaction Table -->
                 <Card padding="sm">
                     <div class="p-6">
-                        <h3 class="text-xl font-bold text-slate-800 mb-4">📋 Transaksi Terbaru</h3>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-4">📋 Transaksi Terbaru</h3>
                     </div>
                     <ModernTable
                         :columns="columns"

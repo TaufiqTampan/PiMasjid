@@ -23,6 +23,7 @@ Route::get('/ibadah/kiblat', [App\Http\Controllers\PublicController::class, 'kib
 Route::get('/galeri', [App\Http\Controllers\PublicController::class, 'galeri'])->name('public.galeri');
 Route::get('/berita', [App\Http\Controllers\PublicController::class, 'berita'])->name('public.berita');
 Route::get('/berita/{post:slug}', [App\Http\Controllers\PublicController::class, 'post'])->name('public.post');
+Route::get('/tarbiyah', [App\Http\Controllers\PublicController::class, 'tarbiyah'])->name('public.tarbiyah');
 
 // Public Al-Quran
 Route::get('/quran', function () {
@@ -50,19 +51,27 @@ Route::post('/info/qurban/register', [App\Http\Controllers\QurbanController::cla
 Route::get('/keuangan', [App\Http\Controllers\TransactionController::class, 'publicIndex'])
     ->name('keuangan.index');
 
+// Public Lumbung Pangan
+Route::get('/lumbung-pangan', [App\Http\Controllers\FoodBarnController::class, 'publicIndex'])
+    ->name('public.lumbung-pangan');
+Route::post('/lumbung-pangan/donate', [App\Http\Controllers\FoodBarnController::class, 'publicDonate'])
+    ->name('public.lumbung-pangan.donate');
+Route::post('/lumbung-pangan/request', [App\Http\Controllers\FoodBarnController::class, 'publicRequest'])
+    ->name('public.lumbung-pangan.request');
+
+// Public Facilities & Booking
+Route::get('/fasilitas', [App\Http\Controllers\PublicFacilityController::class, 'index'])
+    ->name('public.facilities');
+Route::post('/fasilitas/booking', [App\Http\Controllers\PublicFacilityController::class, 'store'])
+    ->name('public.facilities.book');
+Route::get('/fasilitas/cek-status', [App\Http\Controllers\PublicFacilityController::class, 'checkStatus'])
+    ->name('public.facilities.check-status');
+
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Component showcase
-Route::get('/components-showcase', function () {
-    return Inertia::render('ComponentShowcase');
-})->middleware(['auth'])->name('components.showcase');
 
-// FlyonUI Test Route
-Route::get('/flyonui-test', function () {
-    return Inertia::render('FlyonUITest');
-})->name('flyonui.test');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -132,13 +141,45 @@ Route::middleware('auth')->group(function () {
     // Friday Schedule Management
     Route::resource('friday-schedules', App\Http\Controllers\FridayScheduleController::class);
 
+    // Admin Lumbung Pangan Management
+    Route::prefix('admin/lumbung-pangan')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminFoodBarnController::class, 'index'])->name('lumbung-pangan.index');
+        Route::post('/programs', [App\Http\Controllers\AdminFoodBarnController::class, 'storeProgram'])->name('lumbung-pangan.programs.store');
+        Route::post('/programs/{program}', [App\Http\Controllers\AdminFoodBarnController::class, 'updateProgram'])->name('lumbung-pangan.programs.update');
+        Route::delete('/programs/{program}', [App\Http\Controllers\AdminFoodBarnController::class, 'destroyProgram'])->name('lumbung-pangan.programs.destroy');
+        Route::patch('/donations/{donation}/status', [App\Http\Controllers\AdminFoodBarnController::class, 'updateDonationStatus'])->name('lumbung-pangan.donations.status');
+        Route::delete('/donations/{donation}', [App\Http\Controllers\AdminFoodBarnController::class, 'destroyDonation'])->name('lumbung-pangan.donations.destroy');
+        Route::patch('/requests/{requestItem}/status', [App\Http\Controllers\AdminFoodBarnController::class, 'updateRequestStatus'])->name('lumbung-pangan.requests.status');
+        Route::delete('/requests/{requestItem}', [App\Http\Controllers\AdminFoodBarnController::class, 'destroyRequest'])->name('lumbung-pangan.requests.destroy');
+    });
+
+    // Admin Fasilitas & Booking Masjid Management
+    Route::prefix('admin/facilities')->group(function () {
+        Route::get('/', [App\Http\Controllers\FacilityController::class, 'index'])->name('facilities.index');
+        Route::post('/', [App\Http\Controllers\FacilityController::class, 'store'])->name('facilities.store');
+        Route::post('/{facility}', [App\Http\Controllers\FacilityController::class, 'update'])->name('facilities.update');
+        Route::delete('/{facility}', [App\Http\Controllers\FacilityController::class, 'destroy'])->name('facilities.destroy');
+        Route::patch('/bookings/{booking}/status', [App\Http\Controllers\FacilityController::class, 'updateBookingStatus'])->name('facilities.bookings.status');
+        Route::delete('/bookings/{booking}', [App\Http\Controllers\FacilityController::class, 'destroyBooking'])->name('facilities.bookings.destroy');
+    });
+
     // Committee Member Management (Super Admin only for now, or maybe Ketua too? Let's stick to SA as per request)
     Route::resource('committee-members', App\Http\Controllers\CommitteeMemberController::class)
         ->middleware('can:manage_users'); // Using manage_users (Super Admin) permission
 
+    // Wishlist / Kebutuhan Masjid Management
+    Route::get('/wishlists', [App\Http\Controllers\WishlistController::class, 'index'])->name('wishlists.index');
+    Route::post('/wishlists', [App\Http\Controllers\WishlistController::class, 'store'])->name('wishlists.store');
+    Route::put('/wishlists/{wishlist}', [App\Http\Controllers\WishlistController::class, 'update'])->name('wishlists.update');
+    Route::delete('/wishlists/{wishlist}', [App\Http\Controllers\WishlistController::class, 'destroy'])->name('wishlists.destroy');
+
     // Posts Management (Berita & Kegiatan)
     Route::resource('posts', App\Http\Controllers\PostController::class)
         ->middleware('can:manage_posts');
+
+    // Lectures Management (Kajian Umum)
+    Route::resource('lectures', App\Http\Controllers\LectureController::class)
+        ->middleware('can:manage_lectures');
     
     // Zakat Management
     Route::prefix('zakat')->group(function () {

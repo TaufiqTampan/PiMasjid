@@ -81,7 +81,7 @@ const formatRupiah = (amount) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                 ➕ Input Zakat
             </h2>
         </template>
@@ -89,47 +89,47 @@ const formatRupiah = (amount) => {
         <div class="py-12">
             <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
                 <form @submit.prevent="submit">
-                    <div class="bg-white rounded-xl shadow-sm p-8 space-y-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-8 space-y-6">
                         <!-- Data Muzakki -->
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-4">📋 Data Muzakki</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">📋 Data Muzakki</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Nama *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nama *</label>
                                     <input v-model="form.muzakki_name" type="text" required
-                                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                                           class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                                     <p v-if="form.errors.muzakki_name" class="text-red-600 text-sm mt-1">{{ form.errors.muzakki_name }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">NIK</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">NIK</label>
                                     <input v-model="form.muzakki_nik" type="text"
-                                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                                           class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">No HP</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">No HP</label>
                                     <input v-model="form.muzakki_phone" type="text"
-                                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                                           class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tanggal *</label>
                                     <input v-model="form.date" type="date" required
-                                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                                           class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white" />
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Alamat</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Alamat</label>
                                     <textarea v-model="form.muzakki_address" rows="2"
-                                              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"></textarea>
+                                              class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"></textarea>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Tipe Zakat -->
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-4">🕌 Tipe Zakat</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">🕌 Tipe Zakat</h3>
                             <div class="flex gap-4">
                                 <label class="flex items-center cursor-pointer">
                                     <input v-model="form.type" type="radio" value="fitrah" class="w-4 h-4 text-emerald-600" />
@@ -147,18 +147,18 @@ const formatRupiah = (amount) => {
                         </div>
 
                         <!-- Fitrah Form -->
-                        <div v-if="form.type === 'fitrah'" class="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
-                            <h4 class="font-semibold text-emerald-800 mb-4">Zakat Fitrah</h4>
+                        <div v-if="form.type === 'fitrah'" class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-6">
+                            <h4 class="font-semibold text-emerald-800 dark:text-emerald-400 mb-4">Zakat Fitrah</h4>
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Jumlah Jiwa *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Jumlah Jiwa *</label>
                                     <input v-model.number="form.person_count" type="number" min="1" required
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Pembayaran *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Pembayaran *</label>
                                     <div class="flex gap-4">
                                         <label class="flex items-center cursor-pointer">
                                             <input v-model="form.payment_type" type="radio" value="uang" class="w-4 h-4" />
@@ -172,7 +172,7 @@ const formatRupiah = (amount) => {
                                 </div>
 
                                 <div v-if="form.payment_type === 'uang'">
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Harga Beras per Liter</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Harga Beras per Liter</label>
                                     <input v-model.number="ricePricePerLiter" type="number" min="0"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                     <p class="text-sm text-slate-600 mt-2">
@@ -182,7 +182,7 @@ const formatRupiah = (amount) => {
                                 </div>
 
                                 <div v-else>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Jumlah Beras (kg) *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Jumlah Beras (kg) *</label>
                                     <input v-model.number="form.rice_kg" type="number" step="0.1" min="0"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                     <p class="text-sm text-slate-600 mt-2">
@@ -193,24 +193,24 @@ const formatRupiah = (amount) => {
                         </div>
 
                         <!-- Mal Form -->
-                        <div v-if="form.type === 'mal'" class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <div v-if="form.type === 'mal'" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
                             <h4 class="font-semibold text-blue-800 mb-4">Zakat Mal (2.5% dari harta)</h4>
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Total Harta (Rp)</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Total Harta (Rp)</label>
                                     <input v-model.number="harta" type="number" min="0"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Total Hutang (Rp)</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Total Hutang (Rp)</label>
                                     <input v-model.number="hutang" type="number" min="0"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Harga Emas per Gram</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Harga Emas per Gram</label>
                                     <input v-model.number="goldPricePerGram" type="number" min="0"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                 </div>
@@ -238,12 +238,12 @@ const formatRupiah = (amount) => {
                         </div>
 
                         <!-- Profesi Form -->
-                        <div v-if="form.type === 'profesi'" class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                        <div v-if="form.type === 'profesi'" class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
                             <h4 class="font-semibold text-purple-800 mb-4">Zakat Profesi (2.5% dari penghasilan)</h4>
                             
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Penghasilan Bulanan (Rp)</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Penghasilan Bulanan (Rp)</label>
                                     <input v-model.number="penghasilan" type="number" min="0"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                 </div>
@@ -265,14 +265,14 @@ const formatRupiah = (amount) => {
 
                         <!-- Final Amount (if uang) -->
                         <div v-if="form.payment_type === 'uang'">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Jumlah Dibayar (Rp) *</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Jumlah Dibayar (Rp) *</label>
                             <input v-model.number="form.amount" type="number" min="0" required
                                    class="w-full px-4 py-2 border border-slate-300 rounded-lg text-lg font-semibold" />
                         </div>
 
                         <!-- Notes -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Catatan</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Catatan</label>
                             <textarea v-model="form.notes" rows="3"
                                       class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea>
                         </div>

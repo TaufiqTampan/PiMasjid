@@ -261,6 +261,92 @@ class PublicController extends Controller
         ]);
     }
 
+    public function tarbiyah(): Response
+    {
+        $classes = [
+            [
+                'title' => 'Tahsin & Tajwid Al-Quran',
+                'category' => 'Al-Quran',
+                'description' => 'Program perbaikan bacaan Al-Quran sesuai dengan kaidah tajwid secara tartil, dibimbing langsung oleh ustadz berpengalaman.',
+                'schedule' => 'Setiap Sabtu & Ahad (Ba\'da Ashar)',
+                'instructor' => 'Ustadz Hamzah Al-Hafizh',
+                'level' => 'Semua Tingkatan',
+                'badge' => 'Pendaftaran Buka',
+                'icon' => '📖'
+            ],
+            [
+                'title' => 'Kajian Riyadhus Shalihin',
+                'category' => 'Hadits',
+                'description' => 'Membahas bab demi bab dari kitab Riyadhus Shalihin mengenai adab, akhlak, keutamaan amal, dan tata krama islami.',
+                'schedule' => 'Setiap Rabu Malam (Ba\'da Maghrib)',
+                'instructor' => 'Ustadz Ahmad Fauzi, Lc.',
+                'level' => 'Umum',
+                'badge' => 'Rutin',
+                'icon' => '📚'
+            ],
+            [
+                'title' => 'Halaqah Tafsir Al-Quran',
+                'category' => 'Tafsir',
+                'description' => 'Memahami makna mendalam dari ayat-ayat pilihan untuk diimplementasikan dalam amalan kehidupan sehari-hari.',
+                'schedule' => 'Setiap Jumat Subuh',
+                'instructor' => 'Dr. KH. Abdullah Hakim',
+                'level' => 'Umum',
+                'badge' => 'Rutin',
+                'icon' => '🕌'
+            ],
+            [
+                'title' => 'Bahasa Arab Dasar (Al-Muyassar)',
+                'category' => 'Bahasa',
+                'description' => 'Mempelajari dasar-dasar ilmu nahwu dan sharaf untuk membantu memahami literatur bahasa Arab dan bacaan sholat.',
+                'schedule' => 'Setiap Selasa Malam (Ba\'da Isya)',
+                'instructor' => 'Ustadz Rahmat Hidayat, B.A.',
+                'level' => 'Pemula',
+                'badge' => 'Angkatan Baru',
+                'icon' => '✍️'
+            ],
+            [
+                'title' => 'Kajian Fiqih Ibadah',
+                'category' => 'Fiqih',
+                'description' => 'Pembahasan fikih keseharian bersumber dari madzhab Syafi\'i mulai dari thaharah, sholat, puasa, hingga zakat.',
+                'schedule' => 'Setiap Ahad Subuh',
+                'instructor' => 'KH. Zainal Arifin, M.A.',
+                'level' => 'Umum',
+                'badge' => 'Rutin',
+                'icon' => '⚖️'
+            ],
+            [
+                'title' => 'Tahfidz Al-Quran Dewasa',
+                'category' => 'Hafalan',
+                'description' => 'Program setoran hafalan mandiri terjadwal dengan sistem mutaba\'ah yang disiplin dan target terukur.',
+                'schedule' => 'Setiap Senin & Kamis Malam (Ba\'da Maghrib)',
+                'instructor' => 'Ustadz Bilal Al-Fatih',
+                'level' => 'Khusus Dewasa',
+                'badge' => 'Quota Terbatas',
+                'icon' => '🌟'
+            ]
+        ];
+
+        $lectures = \App\Models\Lecture::where('is_active', true)
+            ->orderBy('date', 'asc')
+            ->orderBy('time', 'asc')
+            ->get()
+            ->map(function ($lecture) {
+                return [
+                    'title' => $lecture->title,
+                    'speaker' => $lecture->speaker,
+                    'date' => \Carbon\Carbon::parse($lecture->date)->translatedFormat('l, d F Y'),
+                    'time' => $lecture->time,
+                    'location' => $lecture->location,
+                    'image' => $lecture->image_url,
+                ];
+            });
+
+        return Inertia::render('Public/Tarbiyah', [
+            'classes' => $classes,
+            'lectures' => $lectures,
+        ]);
+    }
+
     private function getNextFriday()
     {
         $now = now();

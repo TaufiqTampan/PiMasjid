@@ -25,13 +25,20 @@ class AppServiceProvider extends ServiceProvider
         // Register Transaction Observer
         \App\Models\Transaction::observe(\App\Observers\TransactionObserver::class);
         
+        // Implicitly grant 'super_admin' and 'admin' all permissions
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if (in_array($user->role, ['super_admin', 'admin'])) {
+                return true;
+            }
+        });
+
         // Define Authorization Gates
         \Illuminate\Support\Facades\Gate::define('manage_finance', function ($user) {
-            return in_array($user->role, ['super_admin', 'bendahara']);
+            return in_array($user->role, ['super_admin', 'admin', 'bendahara']);
         });
         
         \Illuminate\Support\Facades\Gate::define('manage_operations', function ($user) {
-            return in_array($user->role, ['super_admin', 'marbot']);
+            return in_array($user->role, ['super_admin', 'admin', 'marbot']);
         });
         
         \Illuminate\Support\Facades\Gate::define('approve_transaction', function ($user) {
@@ -51,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \Illuminate\Support\Facades\Gate::define('manage_posts', function ($user) {
+            return in_array($user->role, ['super_admin', 'ketua']);
+        });
+
+        \Illuminate\Support\Facades\Gate::define('manage_lectures', function ($user) {
             return in_array($user->role, ['super_admin', 'ketua']);
         });
     }

@@ -120,7 +120,7 @@ watch(() => form.share_group_id, (newGroupId) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                 {{ isEditMode ? '✏️ Edit Qurban' : '➕ Registrasi Qurban' }}
             </h2>
         </template>
@@ -128,39 +128,39 @@ watch(() => form.share_group_id, (newGroupId) => {
         <div class="py-12">
             <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
                 <form @submit.prevent="submit">
-                    <div class="bg-white rounded-xl shadow-sm p-8 space-y-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-8 space-y-6">
                         <!-- Data Peserta -->
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-4">👤 Data Peserta</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">👤 Data Peserta</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Nama Peserta *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nama Peserta *</label>
                                     <input v-model="form.participant_name" type="text" required
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                                     <p v-if="form.errors.participant_name" class="text-red-600 text-sm mt-1">{{ form.errors.participant_name }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">NIK</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">NIK</label>
                                     <input v-model="form.participant_nik" type="text"
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">No HP *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">No HP *</label>
                                     <input v-model="form.participant_phone" type="text" required
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                                     <p v-if="form.errors.participant_phone" class="text-red-600 text-sm mt-1">{{ form.errors.participant_phone }}</p>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal Registrasi *</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tanggal Registrasi *</label>
                                     <input v-model="form.registration_date" type="date" required
                                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-slate-700 mb-2">Alamat</label>
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Alamat</label>
                                     <textarea v-model="form.participant_address" rows="2"
                                               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"></textarea>
                                 </div>
@@ -169,7 +169,7 @@ watch(() => form.share_group_id, (newGroupId) => {
 
                         <!-- Jenis Hewan -->
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800 mb-4">🐑 Jenis Hewan</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">🐑 Jenis Hewan</h3>
                             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                                 <label class="cursor-pointer">
                                     <input v-model="form.animal_type" type="radio" value="kambing" class="peer hidden" />
@@ -216,19 +216,19 @@ watch(() => form.share_group_id, (newGroupId) => {
                         <!-- Detail Hewan -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Estimasi Berat (kg)</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Estimasi Berat (kg)</label>
                                 <input v-model.number="form.animal_weight" type="number" step="0.1" min="0"
                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Harga Total (Rp) *</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Harga Total (Rp) *</label>
                                 <input v-model.number="form.animal_price" type="number" min="0" required
                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Status Pembayaran</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Status Pembayaran</label>
                                 <select v-model="form.status" required
                                         class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
                                     <option value="paid">Sudah Bayar</option>
@@ -238,7 +238,7 @@ watch(() => form.share_group_id, (newGroupId) => {
                         </div>
 
                         <!-- Sistem Patungan -->
-                        <div v-if="canShare" class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                        <div v-if="canShare" class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
                             <h4 class="font-semibold text-purple-800 mb-4">👥 Sistem Patungan</h4>
                             
                             <label class="flex items-center gap-3 mb-4 cursor-pointer">
@@ -248,7 +248,7 @@ watch(() => form.share_group_id, (newGroupId) => {
 
                             <div v-if="form.is_shared" class="space-y-4">
                                     <div class="col-span-2">
-                                        <label class="block text-sm font-medium text-slate-700 mb-2">Gabung Grup Patungan (Opsional)</label>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Gabung Grup Patungan (Opsional)</label>
                                         <select v-model="form.share_group_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                                             <option value="">-- Buat Grup Baru --</option>
                                             <option v-for="group in filteredShareGroups" :key="group.share_group_id" :value="group.share_group_id">
@@ -258,7 +258,7 @@ watch(() => form.share_group_id, (newGroupId) => {
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-2">Jumlah Patungan *</label>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Jumlah Patungan *</label>
                                         <input v-model.number="form.share_count" type="number" :max="maxShareCount" min="1" required
                                                :readonly="!!form.share_group_id"
                                                class="w-full px-4 py-2 border border-slate-300 rounded-lg"
@@ -267,7 +267,7 @@ watch(() => form.share_group_id, (newGroupId) => {
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-700 mb-2">Posisi Anda *</label>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Posisi Anda *</label>
                                         <select v-model.number="form.share_position" required
                                                 class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                                             <option v-for="n in form.share_count" :key="n" :value="n" 
@@ -304,7 +304,7 @@ watch(() => form.share_group_id, (newGroupId) => {
 
                         <!-- Catatan -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Catatan</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Catatan</label>
                             <textarea v-model="form.notes" rows="3"
                                       class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea>
                         </div>

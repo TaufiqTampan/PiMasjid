@@ -28,10 +28,16 @@ class ZakatController extends Controller
         }
 
         // Filter by year
-        if ($request->filled('year')) {
-            $query->byYear($request->year);
+        $requestedYear = $request->input('year');
+        if ($request->filled('year') && $requestedYear != '') {
+            $query->byYear($requestedYear);
         } else {
-            $query->currentYear();
+            $latestYear = Zakat::max('year');
+            if ($latestYear) {
+                $query->byYear($latestYear);
+            } else {
+                $query->currentYear();
+            }
         }
 
         // Filter by payment type
@@ -51,7 +57,8 @@ class ZakatController extends Controller
         $zakats = $query->paginate(20);
 
         // Summary statistics
-        $currentYear = $request->year ?? now()->year;
+        // Summary statistics
+        $currentYear = $request->filled('year') ? $request->year : (Zakat::max('year') ?? now()->year);
         $summary = [
             'total_uang' => Zakat::byYear($currentYear)->byPaymentType('uang')->sum('amount'),
             'total_beras_kg' => Zakat::byYear($currentYear)->byPaymentType('beras')->sum('rice_kg'),
@@ -165,7 +172,7 @@ class ZakatController extends Controller
      */
     public function distribute(): Response
     {
-        $currentYear = now()->year;
+        $currentYear = Zakat::max('year') ?? now()->year;
         
         // Total collected
         $totalCollected = Zakat::byYear($currentYear)->sum('amount');
@@ -235,7 +242,7 @@ class ZakatController extends Controller
      */
     public function reports(Request $request): Response
     {
-        $year = $request->input('year', now()->year);
+        $year = $request->input('year', Zakat::max('year') ?? now()->year);
         
         // Summary by type
         $fitrahTotal = Zakat::fitrah()->byYear($year)->sum('amount');

@@ -55,10 +55,13 @@ const navigationItems = [
             { name: 'Jadwal Sholat', href: '/ibadah/jadwal' },
             { name: 'Agenda', href: '/ibadah/agenda' },
             { name: 'Petugas Jumat', href: '/ibadah/jumat' },
+            { name: '🏛️ Fasilitas & Booking', href: '/fasilitas' },
             { name: '🧭 Arah Kiblat', href: '/ibadah/kiblat' },
             { name: '📖 Al-Quran Digital', href: '/quran' },
+            { name: '🎓 Tarbiyah & Kajian', href: '/tarbiyah' },
             { name: '🕌 Info Zakat', href: '/info/zakat' },
             { name: '🐑 Daftar Qurban', href: '/info/qurban' },
+            { name: '🍱 Lumbung Pangan', href: '/lumbung-pangan' },
         ],
     },
 ];

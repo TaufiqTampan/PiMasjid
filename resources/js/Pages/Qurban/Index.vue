@@ -7,24 +7,26 @@ const props = defineProps({
     qurbans: Object,
     summary: Object,
     filters: Object,
+    current_year: Number|String,
 });
 
 const search = ref(props.filters.search || '');
 const animalTypeFilter = ref(props.filters.animal_type || '');
 const statusFilter = ref(props.filters.status || '');
 const shareTypeFilter = ref(props.filters.share_type || '');
-const yearFilter = ref(props.filters.year || new Date().getFullYear());
+const yearFilter = ref(props.filters.year || props.current_year);
 
 const applyFilters = () => {
     router.get(route('qurban.index'), {
-        search: search.value,
+        search: search.value ? search.value.trim() : '',
         animal_type: animalTypeFilter.value,
         status: statusFilter.value,
         share_type: shareTypeFilter.value,
-        year: yearFilter.value,
+        year: yearFilter.value || props.current_year,
     }, {
         preserveState: true,
         preserveScroll: true,
+        replace: true // Use replace to avoid polluting history for every keystroke
     });
 };
 
@@ -56,7 +58,7 @@ const deleteQurban = (id) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                 🐑 Data Qurban
             </h2>
         </template>
@@ -142,42 +144,42 @@ const deleteQurban = (id) => {
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+                    <table class="w-full text-left divide-y divide-slate-200 dark:divide-slate-700">
+                        <thead class="bg-slate-50 dark:bg-slate-900">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Peserta</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Hewan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Harga</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Aksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Peserta</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Hewan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Harga</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-slate-200">
-                            <tr v-for="qurban in qurbans.data" :key="qurban.id" class="hover:bg-slate-50">
+                        <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                            <tr v-for="qurban in qurbans.data" :key="qurban.id" class="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-slate-900">{{ qurban.participant_name }}</div>
-                                    <div v-if="qurban.participant_nik" class="text-sm text-slate-500">NIK: {{ qurban.participant_nik }}</div>
-                                    <div class="text-sm text-slate-500">{{ qurban.participant_phone }}</div>
-                                    <div v-if="qurban.is_shared" class="text-xs text-purple-600 mt-1">
+                                    <div class="font-medium text-slate-900 dark:text-white">{{ qurban.participant_name }}</div>
+                                    <div v-if="qurban.participant_nik" class="text-sm text-slate-500 dark:text-slate-400">NIK: {{ qurban.participant_nik }}</div>
+                                    <div class="text-sm text-slate-500 dark:text-slate-400">{{ qurban.participant_phone }}</div>
+                                    <div v-if="qurban.is_shared" class="text-xs text-purple-600 dark:text-purple-400 mt-1">
                                         👥 Patungan: {{ qurban.share_position }}/{{ qurban.share_count }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-slate-900 flex items-center gap-2">
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white flex items-center gap-2">
                                         <span class="text-xl">
                                             {{ qurban.animal_type === 'sapi' ? '🐄' : (qurban.animal_type === 'kambing' ? '🐐' : '🐑') }}
                                         </span>
                                         <span class="capitalize">{{ qurban.animal_type }}</span>
                                     </div>
-                                    <div v-if="qurban.animal_weight" class="text-xs text-slate-500">
+                                    <div v-if="qurban.animal_weight" class="text-xs text-slate-500 dark:text-slate-400">
                                         ~{{ qurban.animal_weight }} kg
                                     </div>
                                     <div v-if="qurban.is_shared" class="mt-1">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300">
                                             👥 Grup #{{ qurban.share_group_id ? qurban.share_group_id.substr(0, 6) : '?' }}
                                         </span>
-                                        <div class="text-xs text-purple-600 mt-0.5 ml-1">
+                                        <div class="text-xs text-purple-600 dark:text-purple-400 mt-0.5 ml-1">
                                             Posisi: {{ qurban.share_position }}/{{ qurban.share_count }}
                                         </div>
                                     </div>
@@ -190,10 +192,10 @@ const deleteQurban = (id) => {
                                 <td class="px-6 py-4">
                                     <span class="px-2 py-1 text-xs rounded-full"
                                           :class="{
-                                              'bg-slate-100 text-slate-800': qurban.status === 'registered',
-                                              'bg-emerald-100 text-emerald-800': qurban.status === 'paid',
-                                              'bg-blue-100 text-blue-800': qurban.status === 'slaughtered',
-                                              'bg-purple-100 text-purple-800': qurban.status === 'distributed',
+                                              'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200': qurban.status === 'registered',
+                                              'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300': qurban.status === 'paid',
+                                              'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300': qurban.status === 'slaughtered',
+                                              'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300': qurban.status === 'distributed',
                                           }">
                                         {{ qurban.status === 'registered' ? 'Terdaftar' : 
                                            qurban.status === 'paid' ? 'Lunas' :
@@ -201,29 +203,31 @@ const deleteQurban = (id) => {
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="flex gap-2">
+                                    <div class="flex flex-wrap gap-2 max-w-[200px]">
+                                        <!-- Primary Actions -->
                                         <button v-if="qurban.status === 'registered'"
                                                 @click="updateStatus(qurban.id, 'paid')"
-                                                class="text-xs px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded">
-                                            ✓ Lunas
+                                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 text-xs font-bold rounded-lg transition-all shadow-sm">
+                                            <span>✓</span> Lunas
                                         </button>
                                         <button v-if="qurban.status === 'paid'"
                                                 @click="updateStatus(qurban.id, 'slaughtered')"
-                                                class="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded">
-                                            🔪 Sembelih
+                                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 text-xs font-bold rounded-lg transition-all shadow-sm">
+                                            <span>🔪</span> Sembelih
                                         </button>
                                         
-                                        <!-- Edit Button -->
-                                        <Link :href="route('qurban.edit', qurban.id)"
-                                              class="text-xs px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded">
-                                            ✏️ Edit
-                                        </Link>
-                                        
-                                        <!-- Delete Button -->
-                                        <button @click="deleteQurban(qurban.id)"
-                                                class="text-xs px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded">
-                                            🗑️ Hapus
-                                        </button>
+                                        <!-- Secondary Actions -->
+                                        <div class="flex w-full gap-2 mt-1">
+                                            <Link :href="route('qurban.edit', qurban.id)"
+                                                  class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-amber-600 hover:bg-amber-50 border border-amber-200 text-xs font-bold rounded-lg transition-all shadow-sm">
+                                                <span>✏️</span> Edit
+                                            </Link>
+                                            
+                                            <button @click="deleteQurban(qurban.id)"
+                                                    class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-red-600 hover:bg-red-50 border border-red-200 text-xs font-bold rounded-lg transition-all shadow-sm">
+                                                <span>🗑️</span> Hapus
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -231,9 +235,9 @@ const deleteQurban = (id) => {
                     </table>
 
                     <!-- Pagination -->
-                    <div class="px-6 py-4 bg-slate-50 border-t">
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t dark:border-slate-700">
                         <div class="flex justify-between items-center">
-                            <div class="text-sm text-slate-600">
+                            <div class="text-sm text-slate-600 dark:text-slate-400">
                                 Showing {{ qurbans.from }} - {{ qurbans.to }} of {{ qurbans.total }}
                             </div>
                             <div class="flex gap-2">
@@ -241,13 +245,13 @@ const deleteQurban = (id) => {
                                     <Link v-if="link.url"
                                           :href="link.url"
                                           :class="[
-                                              'px-3 py-1 rounded',
-                                              link.active ? 'bg-emerald-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                                              'px-3 py-1 rounded transition-colors',
+                                              link.active ? 'bg-emerald-500 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                                           ]"
                                           v-html="link.label">
                                     </Link>
                                     <span v-else
-                                          :class="['px-3 py-1 rounded bg-slate-100 text-slate-400 cursor-not-allowed']"
+                                          :class="['px-3 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-200 dark:border-slate-700']"
                                           v-html="link.label">
                                     </span>
                                 </template>

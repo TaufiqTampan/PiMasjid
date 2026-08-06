@@ -148,8 +148,22 @@ class DashboardController extends Controller
                 'performanceMetrics' => $this->getPerformanceMetrics(),
             ],
             'ketua' => [
-                'monthlyTrend' => $this->getMonthlyTrends(6),
+                'monthlyTrend' => $this->getMonthlyTrends(12),
                 'categoryBreakdown' => $this->getCategoryBreakdown('income'),
+                'qurbanStats' => $this->getQurbanStats(),
+                'upcomingAgendas' => \App\Models\Agenda::active()
+                    ->where('date', '>=', now())
+                    ->orderBy('date', 'asc')
+                    ->orderBy('time', 'asc')
+                    ->limit(5)
+                    ->get()
+                    ->map(fn($agenda) => [
+                        'id' => $agenda->id,
+                        'title' => $agenda->title,
+                        'date' => $agenda->date->format('d M Y'),
+                        'time' => $agenda->time ? date('H:i', strtotime($agenda->time)) : 'Selesai',
+                        'location' => $agenda->location,
+                    ]),
             ],
             'bendahara' => [
                 'monthlyComparison' => $this->getMonthlyTrends(6),
@@ -254,5 +268,42 @@ class DashboardController extends Controller
                 'queryCount' => $queryCount,
             ];
         });
+    }
+
+    /**
+     * Get qurban statistics for the current year.
+     */
+    private function getQurbanStats()
+    {
+        $year = now()->year;
+        
+        // We'll also support 1446 or other Hijri years if they are used in the DB
+        $latestYear = \App\Models\Qurban::max('year') ?? $year;
+
+        $stats = \App\Models\Qurban::where('year', $latestYear)->get();
+
+        if ($stats->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'year' => $latestYear,
+            'total_participants' => $stats->count(),
+            'total_funds' => $stats->sum('animal_price'),
+            'formatted_total_funds' => 'Rp ' . number_format($stats->sum('animal_price'), 0, ',', '.'),
+            'by_type' => $stats->groupBy('animal_type')->map(fn($group) => [
+                'count' => $group->count(),
+                'type' => $group->first()->animal_type_label,
+            ])->values(),
+            'by_status' => $stats->groupBy('status')->map(fn($group) => [
+                'count' => $group->count(),
+                'label' => $group->first()->status_label,
+            ])->values(),
+            'payment_progress' => [
+                'paid' => $stats->where('status', '!=', 'registered')->count(),
+                'total' => $stats->count(),
+                'percentage' => $stats->count() > 0 ? round(($stats->where('status', '!=', 'registered')->count() / $stats->count()) * 100) : 0,
+            ]
+        ];
     }
 }

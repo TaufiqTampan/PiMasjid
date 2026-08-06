@@ -35,7 +35,7 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-2xl leading-tight text-slate-900 dark:text-white">
                 📦 Distribusi Daging Qurban
             </h2>
         </template>
@@ -43,13 +43,13 @@ const submit = () => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <!-- Distribution Form -->
-                <div class="bg-white rounded-xl shadow-sm p-8">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-6">Form Distribusi Daging</h3>
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-8">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-6">Form Distribusi Daging</h3>
                     
                     <form @submit.prevent="submit" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Pilih Qurban *</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Pilih Qurban *</label>
                                 <select v-model.number="form.qurban_id" required
                                         class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
                                     <option value="">Pilih hewan yang sudah disembelih...</option>
@@ -80,14 +80,14 @@ const submit = () => {
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Nama Penerima *</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nama Penerima *</label>
                                 <input v-model="form.recipient_name" type="text" required
                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
                                 <p v-if="form.errors.recipient_name" class="text-red-600 text-sm mt-1">{{ form.errors.recipient_name }}</p>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Kategori Penerima *</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Kategori Penerima *</label>
                                 <select v-model="form.recipient_type" required
                                         class="w-full px-4 py-2 border border-slate-300 rounded-lg">
                                     <option value="">Pilih kategori...</option>
@@ -100,7 +100,7 @@ const submit = () => {
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Berat Daging (kg) *</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Berat Daging (kg) *</label>
                                 <input v-model.number="form.meat_kg" type="number" step="0.1" min="0" required
                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                                 <p v-if="form.errors.meat_kg" class="text-red-600 text-sm mt-1">{{ form.errors.meat_kg }}</p>
@@ -110,13 +110,13 @@ const submit = () => {
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal *</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tanggal *</label>
                                 <input v-model="form.date" type="date" required
                                        class="w-full px-4 py-2 border border-slate-300 rounded-lg" />
                             </div>
 
                             <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Catatan</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Catatan</label>
                                 <textarea v-model="form.notes" rows="2"
                                           class="w-full px-4 py-2 border border-slate-300 rounded-lg"></textarea>
                             </div>
@@ -137,25 +137,25 @@ const submit = () => {
                 </div>
 
                 <!-- Distribution History -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 bg-slate-50 border-b">
-                        <h3 class="font-semibold text-slate-800">Riwayat Distribusi</h3>
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b dark:border-slate-700">
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-100">Riwayat Distribusi</h3>
                     </div>
 
                     <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Qurban</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Penerima</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Kategori</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Berat</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Qurban</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Penerima</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Kategori</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Berat</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Tanggal</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-slate-200">
+                        <tbody class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                             <tr v-for="dist in distributions.data" :key="dist.id" class="hover:bg-slate-50">
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-slate-900">
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">
                                         {{ dist.qurban?.participant_name || '-' }}
                                     </div>
                                     <div class="text-xs text-slate-500">
@@ -163,7 +163,7 @@ const submit = () => {
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-slate-900">{{ dist.recipient_name }}</div>
+                                    <div class="font-medium text-slate-900 dark:text-white">{{ dist.recipient_name }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="px-2 py-1 text-xs rounded-full"
@@ -187,7 +187,7 @@ const submit = () => {
                     </table>
 
                     <!-- Pagination -->
-                    <div class="px-6 py-4 bg-slate-50 border-t">
+                    <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t dark:border-slate-700">
                         <div class="flex justify-between items-center">
                             <div class="text-sm text-slate-600">
                                 Showing {{ distributions.from }} - {{ distributions.to }} of {{ distributions.total }}
