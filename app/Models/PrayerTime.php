@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class PrayerTime extends Model
 {
@@ -127,7 +126,7 @@ class PrayerTime extends Model
     public function scopeByMonth(Builder $query, int $month, int $year): void
     {
         $query->whereYear('date', $year)
-              ->whereMonth('date', $month);
+            ->whereMonth('date', $month);
     }
 
     /**

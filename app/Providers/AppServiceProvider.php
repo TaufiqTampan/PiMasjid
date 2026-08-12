@@ -21,10 +21,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
-        
+
         // Register Transaction Observer
         \App\Models\Transaction::observe(\App\Observers\TransactionObserver::class);
-        
+
         // Implicitly grant 'super_admin' and 'admin' all permissions
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
             if (in_array($user->role, ['super_admin', 'admin'])) {
@@ -36,15 +36,15 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('manage_finance', function ($user) {
             return in_array($user->role, ['super_admin', 'admin', 'bendahara']);
         });
-        
+
         \Illuminate\Support\Facades\Gate::define('manage_operations', function ($user) {
             return in_array($user->role, ['super_admin', 'admin', 'marbot']);
         });
-        
+
         \Illuminate\Support\Facades\Gate::define('approve_transaction', function ($user) {
             return in_array($user->role, ['super_admin', 'ketua']);
         });
-        
+
         \Illuminate\Support\Facades\Gate::define('view_dashboard_executive', function ($user) {
             return in_array($user->role, ['super_admin', 'ketua']);
         });

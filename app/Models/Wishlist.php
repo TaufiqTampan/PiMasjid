@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Wishlist extends Model
 {
@@ -72,7 +72,7 @@ class Wishlist extends Model
     protected function progressPercentage(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->target_qty > 0 
+            get: fn () => $this->target_qty > 0
                 ? round(($this->fulfilled_qty / $this->target_qty) * 100, 2)
                 : 0,
         );
@@ -84,7 +84,7 @@ class Wishlist extends Model
     protected function formattedUnitPrice(): Attribute
     {
         return Attribute::make(
-            get: fn () => 'Rp ' . number_format($this->unit_price, 0, ',', '.'),
+            get: fn () => 'Rp '.number_format($this->unit_price, 0, ',', '.'),
         );
     }
 
@@ -94,7 +94,7 @@ class Wishlist extends Model
     protected function formattedTotalTarget(): Attribute
     {
         return Attribute::make(
-            get: fn () => 'Rp ' . number_format($this->total_target, 0, ',', '.'),
+            get: fn () => 'Rp '.number_format($this->total_target, 0, ',', '.'),
         );
     }
 
@@ -104,7 +104,7 @@ class Wishlist extends Model
     protected function formattedTotalFulfilled(): Attribute
     {
         return Attribute::make(
-            get: fn () => 'Rp ' . number_format($this->total_fulfilled, 0, ',', '.'),
+            get: fn () => 'Rp '.number_format($this->total_fulfilled, 0, ',', '.'),
         );
     }
 

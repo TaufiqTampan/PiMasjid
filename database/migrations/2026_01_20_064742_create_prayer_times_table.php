@@ -22,7 +22,7 @@ return new class extends Migration
             $table->time('maghrib')->comment('Maghrib prayer time');
             $table->time('isha')->comment('Isha prayer time');
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index('date');
         });

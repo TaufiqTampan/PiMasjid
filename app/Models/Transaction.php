@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
@@ -91,7 +91,7 @@ class Transaction extends Model
     protected function formattedAmount(): Attribute
     {
         return Attribute::make(
-            get: fn () => 'Rp ' . number_format($this->amount, 0, ',', '.'),
+            get: fn () => 'Rp '.number_format($this->amount, 0, ',', '.'),
         );
     }
 
@@ -115,8 +115,8 @@ class Transaction extends Model
     protected function proofUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->proof_image_path 
-                ? (str_starts_with($this->proof_image_path, 'http') ? $this->proof_image_path : asset('storage/' . $this->proof_image_path))
+            get: fn () => $this->proof_image_path
+                ? (str_starts_with($this->proof_image_path, 'http') ? $this->proof_image_path : asset('storage/'.$this->proof_image_path))
                 : null,
         );
     }
@@ -143,7 +143,7 @@ class Transaction extends Model
     public function scopeThisMonth(Builder $query): void
     {
         $query->whereYear('date', now()->year)
-              ->whereMonth('date', now()->month);
+            ->whereMonth('date', now()->month);
     }
 
     /**
@@ -169,7 +169,7 @@ class Transaction extends Model
     {
         $query->orderBy('date', 'desc');
     }
-    
+
     /**
      * Scope to filter approved transactions.
      */
@@ -177,7 +177,7 @@ class Transaction extends Model
     {
         $query->where('status', 'approved');
     }
-    
+
     /**
      * Scope to filter pending transactions.
      */
@@ -185,7 +185,7 @@ class Transaction extends Model
     {
         $query->where('status', 'pending');
     }
-    
+
     /**
      * Scope to filter rejected transactions.
      */

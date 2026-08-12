@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('status', ['active', 'pending', 'completed', 'cancelled'])->default('active')->comment('Wishlist status');
             $table->text('description')->nullable()->comment('Item description/notes');
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index('status');
         });

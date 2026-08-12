@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->comment('Whether slide is active');
             $table->integer('order')->default(0)->comment('Display order (ascending)');
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index(['is_active', 'order']);
         });

@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useIntervalFn, useNow } from '@vueuse/core';
-import { TransitionGroup } from 'vue';
 
 const props = defineProps({
     currentTime: String,
@@ -10,11 +9,26 @@ const props = defineProps({
     nextPrayer: Object,
     isFriday: Boolean,
     fridaySchedule: Object,
-    slides: Array,
-    recentDonations: Array,
-    monthlyStats: Object,
-    wishlists: Array,
-    displaySettings: Object,
+    slides: {
+        type: Array,
+        default: () => []
+    },
+    recentDonations: {
+        type: Array,
+        default: () => []
+    },
+    monthlyStats: {
+        type: Object,
+        default: () => ({ income: '0', expense: '0', balance: '0' })
+    },
+    wishlists: {
+        type: Array,
+        default: () => []
+    },
+    displaySettings: {
+        type: Object,
+        default: () => ({})
+    },
 });
 
 // Audio & Synthesizer State (Web Audio API)
@@ -76,6 +90,20 @@ const playChime = (type = 'adhan') => {
         }
     } catch (e) {
         console.warn('Audio play error:', e);
+    }
+};
+
+// Fullscreen toggle
+const isFullscreen = ref(false);
+const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        isFullscreen.value = true;
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+            isFullscreen.value = false;
+        }
     }
 };
 
@@ -181,76 +209,108 @@ const resetToNormal = () => {
 
 // Countdown to next prayer for card
 const prayerCountdown = computed(() => {
-    if (!props.nextPrayer) return '00:00';
+    if (!props.nextPrayer || !props.nextPrayer.time) return '00:00:00';
     
     const [hours, minutes] = props.nextPrayer.time.split(':');
     const prayerTime = new Date(now.value);
-    prayerTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    prayerTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
     
     if (props.nextPrayer.tomorrow) {
         prayerTime.setDate(prayerTime.getDate() + 1);
     }
     
     const diff = prayerTime - now.value;
-    if (diff < 0) return '00:00';
+    if (diff < 0) return '00:00:00';
     
-    const totalMinutes = Math.floor(diff / 60000);
-    const hrs = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
+    const totalSeconds = Math.floor(diff / 1000);
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
     
-    return hrs > 0 ? `${hrs}j ${mins}m` : `${mins} mnt`;
+    if (hrs > 0) {
+        return `-${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `-${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 });
 
-// Carousel management with progress bar
-const SLIDE_DURATION_MS = 9000;
+// Carousel management
+const SLIDE_DURATION_MS = 10000;
 const currentSlideIndex = ref(0);
-const slideProgress = ref(0);
-const totalSlides = computed(() => (props.slides?.length || 0) + 2);
+
+// Slide List Definition (Consistent, Fixed-Length Sequence)
+const slideItems = computed(() => {
+    const list = [];
+    
+    // Dynamic slides from database
+    if (props.slides && props.slides.length > 0) {
+        props.slides.forEach((slide) => {
+            list.push({ type: 'info', data: slide });
+        });
+    } else {
+        // Default welcome slide if empty
+        list.push({
+            type: 'info',
+            data: {
+                title: 'Selamat Datang di ' + (props.displaySettings?.site_name || 'MasjidVision'),
+                content: props.displaySettings?.running_text || 'Mari makmurkan masjid kita dengan sholat berjamaah dan menjaga ketertiban serta kebersihan rumah Allah.',
+                image_url: null
+            }
+        });
+    }
+    
+    // Friday schedule slide (if available)
+    if (props.fridaySchedule && props.fridaySchedule.khatib && props.fridaySchedule.khatib !== '-') {
+        list.push({ type: 'friday', data: props.fridaySchedule });
+    }
+
+    // Financial summary slide
+    list.push({ type: 'financial', data: props.monthlyStats });
+
+    // Wishlist / wakaf slide (if exists)
+    if (props.wishlists && props.wishlists.length > 0) {
+        list.push({ type: 'wishlist', data: props.wishlists });
+    }
+
+    return list;
+});
+
+const totalSlides = computed(() => slideItems.value.length);
 
 useIntervalFn(() => {
-    if (displayMode.value === 'NORMAL') {
-        slideProgress.value += (100 / (SLIDE_DURATION_MS / 100));
-        if (slideProgress.value >= 100) {
-            slideProgress.value = 0;
-            currentSlideIndex.value = (currentSlideIndex.value + 1) % totalSlides.value;
-        }
+    if (displayMode.value === 'NORMAL' && totalSlides.value > 0) {
+        currentSlideIndex.value = (currentSlideIndex.value + 1) % totalSlides.value;
     }
-}, 100);
+}, SLIDE_DURATION_MS);
 
 const currentSlide = computed(() => {
-    const index = currentSlideIndex.value;
-    const slidesCount = props.slides?.length || 0;
-    
-    if (index < slidesCount) {
-        return { type: 'info', data: props.slides[index] };
-    } else if (index === slidesCount) {
-        return { type: 'financial', data: props.monthlyStats };
-    } else {
-        return { type: 'wishlist', data: props.wishlists };
-    }
+    if (totalSlides.value === 0) return null;
+    const safeIndex = currentSlideIndex.value % totalSlides.value;
+    return slideItems.value[safeIndex];
 });
 
 // Running Ticker Content
 const tickerContent = computed(() => {
-    const settingsText = props.displaySettings?.running_text || 'Selamat datang di MasjidVision. Mohon heningkan HP Anda saat di ruang sholat.';
+    const settingsText = props.displaySettings?.running_text || 'Selamat datang di rumah Allah. Mohon heningkan nada dering ponsel Anda dan luruskan shaf.';
     const donations = props.recentDonations?.map(d => `💚 Donasi ${d.category}: ${d.amount}`) || [];
-    return `${settingsText}   •   ${donations.join('   •   ')}   •   `;
+    return `${settingsText}   ✦   ${donations.length > 0 ? donations.join('   ✦   ') + '   ✦   ' : ''}`;
 });
 
 // Reload Inertia state every 60s
 useIntervalFn(() => {
     router.reload({
-        only: ['todayPrayerTimes', 'nextPrayer', 'recentDonations', 'slides', 'monthlyStats', 'wishlists'],
+        only: ['todayPrayerTimes', 'nextPrayer', 'recentDonations', 'slides', 'monthlyStats', 'wishlists', 'fridaySchedule'],
         preserveScroll: true,
     });
 }, 60000);
 
-// Key shortcuts ('D' for Demo, 'M' for Mute)
+// Key shortcuts ('D' for Demo, 'M' for Mute, 'F' for Fullscreen)
 const handleKeyDown = (e) => {
     if (e.key === 'd' || e.key === 'D') {
         showDemoControls.value = !showDemoControls.value;
     } else if (e.key === 'm' || e.key === 'M') {
         audioMuted.value = !audioMuted.value;
+    } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
     }
 };
 
@@ -262,49 +322,58 @@ onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyDown);
 });
 
+// Clean Prayer Times 6-Pillar List
 const prayerTimesList = computed(() => {
     if (!props.todayPrayerTimes) return [];
     return [
-        { name: 'Subuh', time: props.todayPrayerTimes.subuh },
-        { name: 'Dzuhur', time: props.todayPrayerTimes.dhuhr },
-        { name: 'Ashar', time: props.todayPrayerTimes.asr },
-        { name: 'Maghrib', time: props.todayPrayerTimes.maghrib },
-        { name: 'Isya', time: props.todayPrayerTimes.isha },
+        { name: 'Subuh', time: props.todayPrayerTimes.subuh || '04:30', isPrayer: true },
+        { name: 'Terbit', time: props.todayPrayerTimes.sunrise || '05:45', isPrayer: false },
+        { name: 'Dzuhur', time: props.todayPrayerTimes.dhuhr || '12:05', isPrayer: true },
+        { name: 'Ashar', time: props.todayPrayerTimes.asr || '15:20', isPrayer: true },
+        { name: 'Maghrib', time: props.todayPrayerTimes.maghrib || '18:10', isPrayer: true },
+        { name: 'Isya', time: props.todayPrayerTimes.isha || '19:25', isPrayer: true },
     ];
 });
+
+const isNextPrayer = (prayerName) => {
+    if (!props.nextPrayer || !props.nextPrayer.name) return false;
+    const p1 = prayerName.toLowerCase();
+    const p2 = props.nextPrayer.name.toLowerCase();
+    return p1 === p2 || (p1 === 'dzuhur' && p2 === 'dhuhr') || (p1 === 'ashar' && p2 === 'asr') || (p1 === 'isya' && p2 === 'isha');
+};
 </script>
 
 <template>
-    <Head title="TV Display Digital - Pusat Informasi Masjid" />
+    <Head title="Display Digital TV Masjid" />
 
-    <!-- Root App Shell - Solid High-Contrast Container -->
-    <div style="background-color: #060911; color: #ffffff;" class="min-h-screen flex flex-col justify-between overflow-hidden relative select-none font-sans">
+    <!-- Root App Shell - Fixed 100vh Landscape TV Layout (Strictly No Scroll) -->
+    <div style="background-color: #030712; color: #ffffff;" class="h-screen w-screen max-h-screen overflow-hidden flex flex-col justify-between select-none font-sans">
         
         <!-- ------------------------------------------------------------- -->
         <!-- STATE 1: ADHAN SCREEN OVERLAY                                  -->
         <!-- ------------------------------------------------------------- -->
         <Transition name="fade">
-            <div v-if="displayMode === 'ADHAN'" style="background-color: #060911;" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center">
+            <div v-if="displayMode === 'ADHAN'" style="background-color: #030712;" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center">
                 <div class="relative z-10 space-y-6 max-w-4xl">
-                    <div style="background-color: rgba(16, 185, 129, 0.2); border-color: #34d399;" class="w-28 h-28 mx-auto rounded-full border-4 flex items-center justify-center text-5xl shadow-2xl animate-bounce">
+                    <div style="background-color: rgba(16, 185, 129, 0.2); border-color: #34d399;" class="w-24 h-24 mx-auto rounded-full border-4 flex items-center justify-center text-5xl shadow-2xl animate-bounce">
                         🕌
                     </div>
                     <div style="background-color: rgba(16, 185, 129, 0.2); border-color: #34d399; color: #6ee7b7;" class="inline-block px-6 py-2 rounded-full border font-extrabold uppercase tracking-widest text-sm">
-                        Adhan — Waktu Sholat Tiba
+                        WAKTU SHOLAT TIBA
                     </div>
                     <h1 style="color: #ffffff;" class="text-6xl md:text-8xl font-black tracking-tight uppercase drop-shadow-lg">
-                        WAKTU SHOLAT {{ activePrayerName }}
+                        ADHAN {{ activePrayerName }}
                     </h1>
-                    <p style="color: #a7f3d0;" class="text-2xl md:text-3xl font-light">
-                        Telah Tiba Untuk Wilayah {{ displaySettings?.site_address || 'Masjid' }} dan Sekitarnya
+                    <p style="color: #a7f3d0;" class="text-2xl font-light">
+                        Telah masuk waktu sholat {{ activePrayerName }} untuk wilayah {{ displaySettings?.site_address || 'Masjid' }} dan sekitarnya
                     </p>
                     <div class="pt-4">
-                        <div style="color: #fbbf24;" class="text-6xl md:text-7xl font-mono font-black tracking-tighter">
+                        <div style="color: #fbbf24;" class="text-6xl md:text-7xl font-mono font-black tracking-tight">
                             {{ formatCountdown(adhanSecondsRemaining) }}
                         </div>
-                        <span style="color: #9ca3af;" class="text-xs font-bold uppercase tracking-widest mt-2 block">Menuju Countdown Iqamah</span>
+                        <span style="color: #9ca3af;" class="text-xs font-bold uppercase tracking-widest mt-2 block">Menuju Hitung Mundur Iqamah</span>
                     </div>
-                    <button @click="triggerIqamah(activePrayerName)" style="background-color: #10b981; color: #060911;" class="mt-6 px-8 py-3.5 rounded-full font-black text-lg shadow-2xl transition-all border-none cursor-pointer">
+                    <button @click="triggerIqamah(activePrayerName)" style="background-color: #10b981; color: #030712;" class="mt-6 px-8 py-3 rounded-full font-black text-base shadow-2xl transition cursor-pointer border-none">
                         Lanjut ke Iqamah Sekarang ⏩
                     </button>
                 </div>
@@ -315,7 +384,7 @@ const prayerTimesList = computed(() => {
         <!-- STATE 2: IQAMAH COUNTDOWN OVERLAY                             -->
         <!-- ------------------------------------------------------------- -->
         <Transition name="fade">
-            <div v-if="displayMode === 'IQAMAH'" style="background-color: #060911;" class="fixed inset-0 z-50 flex flex-col items-center justify-between p-8 text-center">
+            <div v-if="displayMode === 'IQAMAH'" style="background-color: #030712;" class="fixed inset-0 z-50 flex flex-col items-center justify-between p-8 text-center">
                 <div class="relative z-10 pt-4">
                     <span style="background-color: rgba(245, 158, 11, 0.2); border-color: #fbbf24; color: #fcd34d;" class="px-6 py-2 rounded-full border font-extrabold uppercase tracking-widest text-sm">
                         HITUNG MUNDUR IQAMAH — {{ activePrayerName }}
@@ -323,22 +392,22 @@ const prayerTimesList = computed(() => {
                 </div>
 
                 <div class="relative z-10 my-auto space-y-4">
-                    <div style="color: #fbbf24;" class="text-[9rem] md:text-[13rem] leading-none font-mono font-black tracking-tighter">
+                    <div style="color: #fbbf24;" class="text-[9rem] md:text-[12rem] leading-none font-mono font-black tracking-tighter">
                         {{ formatCountdown(iqamahSecondsRemaining) }}
                     </div>
-                    <h2 style="color: #ffffff;" class="text-3xl md:text-4xl font-extrabold tracking-tight max-w-3xl mx-auto uppercase">
-                        Luruskan dan Rapatkan Shaf
+                    <h2 style="color: #ffffff;" class="text-3xl md:text-5xl font-black tracking-tight max-w-3xl mx-auto uppercase">
+                        LURUSKAN DAN RAPATKAN SHAF
                     </h2>
-                    <p style="color: #fde68a;" class="text-xl font-medium">
-                        Mohon Nonaktifkan / Heningkan Nada Dering Telepon Genggam Anda
+                    <p style="color: #fde68a;" class="text-xl md:text-2xl font-medium">
+                        Mohon heningkan / matikan nada dering ponsel Anda
                     </p>
                 </div>
 
                 <div class="relative z-10 pb-4 flex gap-4">
-                    <button @click="triggerStandby" style="background-color: #f59e0b; color: #060911;" class="px-8 py-3.5 rounded-full font-black text-base shadow-xl border-none cursor-pointer">
+                    <button @click="triggerStandby" style="background-color: #f59e0b; color: #030712;" class="px-8 py-3 rounded-full font-black text-base shadow-xl cursor-pointer border-none">
                         Mulai Sholat (Layar Senyap) ⏹️
                     </button>
-                    <button @click="resetToNormal" style="background-color: #1f2937; color: #d1d5db; border-color: #374151;" class="px-6 py-3.5 rounded-full font-bold text-base border cursor-pointer">
+                    <button @click="resetToNormal" style="background-color: #1f2937; color: #d1d5db; border-color: #374151;" class="px-6 py-3 rounded-full font-bold text-base border cursor-pointer">
                         Batalkan
                     </button>
                 </div>
@@ -351,17 +420,17 @@ const prayerTimesList = computed(() => {
         <Transition name="fade">
             <div v-if="displayMode === 'PRAYER_STANDBY'" style="background-color: #000000;" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center">
                 <div class="space-y-6 max-w-3xl">
-                    <div class="text-7xl opacity-90">📵</div>
+                    <div class="text-7xl opacity-80 animate-pulse">📵</div>
                     <h1 style="color: #ffffff;" class="text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase">
                         LURUSKAN & RAPATKAN SHAF
                     </h1>
-                    <p style="color: #d1d5db;" class="text-xl md:text-2xl font-light">
-                        Mohon Nonaktifkan HP Demi Kekhusyukan Sholat
+                    <p style="color: #cbd5e1;" class="text-xl md:text-2xl font-light">
+                        Mohon heningkan HP demi menjaga kekhusyukan ibadah sholat
                     </p>
-                    <div style="color: #6b7280;" class="font-mono text-xs pt-6">
-                        Layar kembali aktif otomatis dalam {{ formatCountdown(standbySecondsRemaining) }}
+                    <div style="color: #64748b;" class="font-mono text-sm pt-6">
+                        Layar kembali aktif dalam {{ formatCountdown(standbySecondsRemaining) }}
                     </div>
-                    <button @click="resetToNormal" style="background-color: #111827; border-color: #374151; color: #9ca3af;" class="mt-4 px-6 py-2 rounded-full border text-xs cursor-pointer">
+                    <button @click="resetToNormal" style="background-color: #111827; border-color: #374151; color: #94a3b8;" class="mt-4 px-6 py-2 rounded-full border text-xs cursor-pointer">
                         Kembali ke Tampilan Utama
                     </button>
                 </div>
@@ -369,266 +438,314 @@ const prayerTimesList = computed(() => {
         </Transition>
 
         <!-- ------------------------------------------------------------- -->
-        <!-- MAIN TOP HEADER BAR                                           -->
+        <!-- TOP HEADER BAR (Compact, Clean & High-Contrast)               -->
         <!-- ------------------------------------------------------------- -->
-        <header style="background-color: #0f172a; border-bottom: 2px solid #1e293b;" class="px-6 py-3 flex items-center justify-between shadow-xl z-20 shrink-0">
-            <!-- Brand Logo & Title -->
-            <div class="flex items-center gap-3">
-                <div style="background-color: rgba(16, 185, 129, 0.2); border-color: #34d399; color: #34d399;" class="w-10 h-10 rounded-xl border flex items-center justify-center text-xl">
+        <header style="height: 72px; background-color: #0f172a; border-bottom: 2px solid #1e293b;" class="px-6 flex items-center justify-between shadow-xl z-20 shrink-0">
+            <!-- Left: Mosque Identity -->
+            <div class="flex items-center gap-3.5">
+                <div style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399;" class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
                     🕌
                 </div>
                 <div>
-                    <h1 style="color: #ffffff;" class="text-xl font-black uppercase tracking-wider">{{ displaySettings?.site_name || 'MASJIDVISION' }}</h1>
-                    <p style="color: #94a3b8;" class="text-[11px] font-medium tracking-wide">{{ displaySettings?.site_address || 'Pusat Ibadah Umat' }}</p>
+                    <h1 style="color: #ffffff;" class="text-xl font-black uppercase tracking-wider leading-tight">
+                        {{ displaySettings?.site_name || 'MASJIDVISION' }}
+                    </h1>
+                    <p style="color: #94a3b8;" class="text-xs font-medium tracking-wide truncate max-w-md">
+                        {{ displaySettings?.site_address || 'Pusat Ibadah & Dakwah Umat' }}
+                    </p>
                 </div>
             </div>
 
-            <!-- Header Clock & Hijri Date -->
-            <div class="flex items-center gap-6">
-                <div v-if="todayPrayerTimes?.hijri_date" class="text-right hidden sm:block">
-                    <span style="color: #34d399;" class="text-[10px] font-bold uppercase tracking-widest block">Tanggal Hijriah</span>
-                    <span style="color: #e2e8f0;" class="text-xs font-semibold">{{ todayPrayerTimes.hijri_date }}</span>
+            <!-- Center: Next Prayer Countdown Badge -->
+            <div v-if="nextPrayer" style="background-color: #020617; border: 1px solid #10b981;" class="hidden md:flex items-center gap-3 px-4 py-1.5 rounded-2xl shadow-md">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <div class="flex flex-col">
+                    <span style="color: #34d399;" class="text-[10px] font-black uppercase tracking-widest">
+                        Menuju {{ nextPrayer.name }} ({{ nextPrayer.time }})
+                    </span>
+                    <span style="color: #fbbf24;" class="text-base font-black font-mono leading-none mt-0.5">
+                        {{ prayerCountdown }}
+                    </span>
                 </div>
-                <div style="border-left: 1px solid #334155;" class="text-right pl-4">
-                    <span style="color: #94a3b8;" class="text-[10px] font-bold uppercase tracking-widest block">{{ formattedDate }}</span>
-                    <span style="color: #34d399;" class="text-2xl font-black font-mono tracking-tight">{{ formattedTime }}</span>
+            </div>
+
+            <!-- Right: Date & Big Digital Clock -->
+            <div class="flex items-center gap-6">
+                <!-- Hijri & Gregorian Dates -->
+                <div class="text-right hidden sm:flex flex-col justify-center">
+                    <span v-if="todayPrayerTimes?.hijri_date" style="color: #34d399;" class="text-xs font-bold tracking-wide">
+                        {{ todayPrayerTimes.hijri_date }}
+                    </span>
+                    <span style="color: #cbd5e1;" class="text-xs font-semibold">
+                        {{ formattedDate }}
+                    </span>
+                </div>
+
+                <!-- Live Digital Clock -->
+                <div style="border-left: 1px solid #334155;" class="pl-4 flex items-center">
+                    <span style="color: #34d399;" class="text-3xl md:text-4xl font-black font-mono tracking-tight">
+                        {{ formattedTime }}
+                    </span>
                 </div>
             </div>
         </header>
 
         <!-- ------------------------------------------------------------- -->
-        <!-- MAIN DISPLAY LAYOUT: 100% UNCLIPPED HERO SLIDE CENTER STAGE   -->
+        <!-- MAIN INFORMATION STAGE (Fixed-Height Stable Slide Area)      -->
         <!-- ------------------------------------------------------------- -->
-        <main class="flex-1 p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+        <main class="flex-1 w-full px-6 py-4 flex flex-col justify-center overflow-hidden relative">
             
-            <!-- HERO CENTER STAGE (8 Cols on LG): FULLY VISIBLE SLIDE PANEL -->
-            <div class="lg:col-span-8 flex flex-col">
-                <div style="background-color: #0f172a; border: 2px solid #10b981;" class="rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col justify-between flex-1 min-h-[420px] md:min-h-[500px]">
-                    
-                    <!-- Top Slide Header & Progress Line Bar -->
-                    <div class="w-full flex flex-col gap-3 pb-3 border-b border-slate-800 shrink-0">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span style="background-color: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24;" class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                                    📢 INFORMASI TERKINI MASJID
-                                </span>
-                            </div>
+            <!-- Fixed Frame Container (Layout Never Shifts or Jumps) -->
+            <div style="background-color: #0b1329; border: 2px solid #1e293b;" class="w-full h-full rounded-3xl p-6 shadow-2xl flex flex-col justify-between relative overflow-hidden">
+                
+                <!-- Slide Header: Category Pill + Progress Indicator -->
+                <div style="border-bottom: 1px solid #1e293b;" class="w-full flex items-center justify-between pb-3 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <span style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7;" class="px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            {{ currentSlide?.type === 'info' ? 'INFORMASI MASJID' : currentSlide?.type === 'financial' ? 'LAPORAN KAS' : currentSlide?.type === 'friday' ? 'JADWAL JUMAT' : 'PROGRAM WAKAF' }}
+                        </span>
+                    </div>
 
-                            <div class="flex items-center gap-2">
-                                <span style="color: #94a3b8;" class="text-xs font-bold uppercase tracking-wider mr-2">
-                                    Slide {{ currentSlideIndex + 1 }} dari {{ totalSlides }}
-                                </span>
-                                <div 
-                                    v-for="i in totalSlides" 
-                                    :key="i"
-                                    :style="currentSlideIndex === i - 1 ? 'background-color: #fbbf24; width: 28px;' : 'background-color: #1e293b; width: 8px;'"
-                                    class="h-2 rounded-full transition-all duration-300"
-                                ></div>
-                            </div>
-                        </div>
-
-                        <!-- Slide Progress Line Bar -->
-                        <div style="background-color: #1e293b;" class="w-full h-1.5 rounded-full overflow-hidden">
+                    <!-- Slide Dots -->
+                    <div class="flex items-center gap-3">
+                        <span style="color: #94a3b8;" class="text-xs font-semibold">
+                            Slide {{ currentSlideIndex + 1 }} / {{ totalSlides }}
+                        </span>
+                        <div class="flex items-center gap-1.5">
                             <div 
-                                style="background: linear-gradient(to right, #10b981, #fbbf24);" 
-                                class="h-full rounded-full transition-all duration-100 ease-linear"
-                                :style="{ width: slideProgress + '%' }"
+                                v-for="i in totalSlides" 
+                                :key="i"
+                                :style="currentSlideIndex === i - 1 ? 'background-color: #fbbf24; width: 20px;' : 'background-color: #1e293b; width: 8px;'"
+                                class="h-2 rounded-full transition-all duration-300"
                             ></div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- SLIDE CONTENT HERO DISPLAY CONTAINER (FULLY VISIBLE, NO ABSOLUTE CLIPPING) -->
-                    <div class="flex-1 flex flex-col items-center justify-center py-4 my-auto w-full text-center">
-                        
-                        <!-- Slide Type 1: General Info & Announcements -->
+                <!-- SLIDE VIEWPORT (Fixed Geometry & Serene Absolute Crossfade) -->
+                <div class="flex-1 w-full h-full relative overflow-hidden">
+                    <Transition name="peaceful-fade">
                         <div 
-                            v-if="currentSlide.type === 'info'" 
+                            v-if="currentSlide" 
                             :key="`slide-${currentSlideIndex}`"
-                            class="w-full flex flex-col items-center justify-center text-center animate-fade-in"
+                            class="absolute inset-0 w-full h-full flex items-center justify-center"
                         >
-                            <!-- Poster Image Display -->
-                            <div v-if="currentSlide.data.image_url" class="mb-4 flex items-center justify-center">
-                                <img 
-                                    :src="currentSlide.data.image_url" 
-                                    :alt="currentSlide.data.title" 
-                                    style="border: 2px solid #334155;"
-                                    class="max-h-56 md:max-h-72 w-auto max-w-full rounded-2xl object-contain shadow-2xl"
-                                />
-                            </div>
-
-                            <!-- Grand Title -->
-                            <h2 style="color: #fbbf24;" class="text-3xl md:text-5xl font-black mb-3 tracking-tight uppercase leading-tight">
-                                {{ currentSlide.data.title }}
-                            </h2>
-                            
-                            <!-- Body Content -->
-                            <p style="color: #f1f5f9;" class="text-lg md:text-2xl max-w-3xl font-medium leading-relaxed">
-                                {{ currentSlide.data.content }}
-                            </p>
-                        </div>
-
-                        <!-- Slide Type 2: Grand Financial Transparency -->
-                        <div 
-                            v-else-if="currentSlide.type === 'financial'" 
-                            :key="'financial'"
-                            class="w-full flex flex-col items-center justify-center text-center animate-fade-in"
-                        >
-                            <div style="background-color: rgba(16, 185, 129, 0.15); border: 1px solid #059669; color: #34d399;" class="px-5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4">
-                                Transparansi Baitul Maal
-                            </div>
-                            <h2 style="color: #ffffff;" class="text-3xl md:text-4xl font-black mb-6 uppercase tracking-tight">
-                                Laporan Kas Masjid Bulan Ini
-                            </h2>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl my-auto">
-                                <div style="background-color: #020617; border: 2px solid #059669;" class="p-6 rounded-3xl shadow-2xl text-center">
-                                    <div style="color: #34d399;" class="text-xs font-black uppercase tracking-widest mb-2">Total Pemasukan</div>
-                                    <div style="color: #ffffff;" class="text-3xl md:text-4xl font-black font-mono">Rp {{ monthlyStats?.income || '0' }}</div>
-                                </div>
-                                <div style="background-color: #020617; border: 2px solid #f43f5e;" class="p-6 rounded-3xl shadow-2xl text-center">
-                                    <div style="color: #fb7185;" class="text-xs font-black uppercase tracking-widest mb-2">Total Pengeluaran</div>
-                                    <div style="color: #ffffff;" class="text-3xl md:text-4xl font-black font-mono">Rp {{ monthlyStats?.expense || '0' }}</div>
-                                </div>
-                                <div style="background-color: #020617; border: 2px solid #f59e0b;" class="p-6 rounded-3xl shadow-2xl text-center">
-                                    <div style="color: #fbbf24;" class="text-xs font-black uppercase tracking-widest mb-2">Saldo Akhir Kas</div>
-                                    <div style="color: #fde68a;" class="text-3xl md:text-4xl font-black font-mono">Rp {{ monthlyStats?.balance || '0' }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Slide Type 3: Wakaf & Community Fundraising Progress -->
-                        <div 
-                            v-else-if="currentSlide.type === 'wishlist'" 
-                            :key="'wishlist'"
-                            class="w-full flex flex-col items-center justify-center text-center animate-fade-in"
-                        >
-                            <div style="background-color: rgba(245, 158, 11, 0.15); border: 1px solid #d97706; color: #fbbf24;" class="px-5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-widest mb-4">
-                                Peluang Amal Jariah
-                            </div>
-                            <h2 style="color: #ffffff;" class="text-3xl md:text-4xl font-black mb-6 uppercase tracking-tight">
-                                Program Wakaf & Kebutuhan Masjid
-                            </h2>
-
-                            <div class="w-full max-w-3xl my-auto space-y-4 text-left">
-                                <div v-if="!wishlists || wishlists.length === 0" style="background-color: #020617; border: 1px solid #1e293b; color: #94a3b8;" class="rounded-3xl p-8 text-center text-base">
-                                    Belum ada daftar program wakaf aktif saat ini.
-                                </div>
-                                <div 
-                                    v-else
-                                    v-for="item in wishlists" 
-                                    :key="item.id"
-                                    style="background-color: #020617; border: 1px solid #1e293b;"
-                                    class="p-5 rounded-3xl shadow-2xl"
-                                >
-                                    <div class="flex justify-between items-center mb-2">
-                                        <h3 style="color: #ffffff;" class="text-xl md:text-2xl font-black uppercase tracking-tight truncate pr-4">{{ item.item_name }}</h3>
-                                        <span style="color: #34d399;" class="text-2xl font-black font-mono shrink-0">{{ item.progress_percentage || 0 }}%</span>
+                            <!-- 1. INFO / ANNOUNCEMENT SLIDE -->
+                            <div 
+                                v-if="currentSlide.type === 'info'" 
+                                class="w-full h-full flex items-center justify-center"
+                            >
+                                <!-- Layout A: With Poster Image (Horizontal Split) -->
+                                <div v-if="currentSlide.data.image_url" class="w-full h-full flex flex-row items-center justify-center gap-8 px-4">
+                                    <div class="h-full max-h-[300px] w-auto max-w-[45%] flex items-center justify-center shrink-0">
+                                        <img 
+                                            :src="currentSlide.data.image_url" 
+                                            :alt="currentSlide.data.title" 
+                                            style="border: 2px solid #334155;"
+                                            class="h-full max-h-[300px] w-auto object-contain rounded-2xl shadow-2xl"
+                                        />
                                     </div>
-                                    <div style="background-color: #1e293b;" class="w-full rounded-full h-4 overflow-hidden mb-3">
-                                        <div 
-                                            style="background: linear-gradient(to right, #10b981, #fbbf24);"
-                                            class="h-full rounded-full transition-all duration-1000"
-                                            :style="{ width: Math.min(item.progress_percentage || 0, 100) + '%' }"
-                                        ></div>
+                                    <div class="flex-1 flex flex-col justify-center text-left space-y-3 max-w-2xl">
+                                        <h2 style="color: #fbbf24;" class="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight line-clamp-2">
+                                            {{ currentSlide.data.title }}
+                                        </h2>
+                                        <p style="color: #f1f5f9;" class="text-lg md:text-xl font-medium leading-relaxed line-clamp-6">
+                                            {{ currentSlide.data.content }}
+                                        </p>
                                     </div>
-                                    <div style="color: #94a3b8;" class="flex justify-between text-xs font-bold uppercase tracking-wider">
-                                        <span>Terkumpul: <strong style="color: #6ee7b7;">{{ item.formatted_total_fulfilled }}</strong></span>
-                                        <span>Target: <strong style="color: #ffffff;">{{ item.formatted_total_target }}</strong></span>
+                                </div>
+
+                                <!-- Layout B: Text Only Announcement (Centered Grand Typography) -->
+                                <div v-else class="w-full h-full flex flex-col items-center justify-center text-center px-8 max-w-4xl mx-auto space-y-4">
+                                    <h2 style="color: #fbbf24;" class="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight">
+                                        {{ currentSlide.data.title }}
+                                    </h2>
+                                    <p style="color: #f1f5f9;" class="text-xl md:text-2xl font-medium leading-relaxed max-w-3xl">
+                                        {{ currentSlide.data.content }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 2. FINANCIAL REPORT SLIDE -->
+                            <div 
+                                v-else-if="currentSlide.type === 'financial'" 
+                                class="w-full h-full flex flex-col items-center justify-center text-center px-4"
+                            >
+                                <h2 style="color: #ffffff;" class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-6">
+                                    Rekapitulasi Kas & Infaq Masjid Bulan Ini
+                                </h2>
+
+                                <div class="grid grid-cols-3 gap-6 w-full max-w-4xl">
+                                    <div style="background-color: #020617; border: 2px solid #059669;" class="p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center">
+                                        <span style="color: #34d399;" class="text-xs font-black uppercase tracking-widest mb-2">Total Pemasukan</span>
+                                        <span style="color: #ffffff;" class="text-2xl md:text-3xl font-black font-mono">Rp {{ monthlyStats?.income || '0' }}</span>
+                                    </div>
+                                    <div style="background-color: #020617; border: 2px solid #e11d48;" class="p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center">
+                                        <span style="color: #fb7185;" class="text-xs font-black uppercase tracking-widest mb-2">Total Pengeluaran</span>
+                                        <span style="color: #ffffff;" class="text-2xl md:text-3xl font-black font-mono">Rp {{ monthlyStats?.expense || '0' }}</span>
+                                    </div>
+                                    <div style="background-color: #020617; border: 2px solid #d97706;" class="p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center">
+                                        <span style="color: #fbbf24;" class="text-xs font-black uppercase tracking-widest mb-2">Saldo Kas Terkini</span>
+                                        <span style="color: #fde68a;" class="text-2xl md:text-3xl font-black font-mono">Rp {{ monthlyStats?.balance || '0' }}</span>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- 3. FRIDAY OFFICERS SCHEDULE SLIDE -->
+                            <div 
+                                v-else-if="currentSlide.type === 'friday'" 
+                                class="w-full h-full flex flex-col items-center justify-center text-center px-4"
+                            >
+                                <h2 style="color: #ffffff;" class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-6">
+                                    Petugas Sholat Jumat ({{ fridaySchedule?.date }})
+                                </h2>
+
+                                <div class="grid grid-cols-3 gap-6 w-full max-w-4xl">
+                                    <div style="background-color: #020617; border: 2px solid #059669;" class="p-6 rounded-3xl shadow-xl">
+                                        <span style="color: #34d399;" class="text-xs font-black uppercase tracking-widest block mb-2">Khatib</span>
+                                        <span style="color: #ffffff;" class="text-xl md:text-2xl font-extrabold">{{ fridaySchedule?.khatib || '-' }}</span>
+                                    </div>
+                                    <div style="background-color: #020617; border: 2px solid #059669;" class="p-6 rounded-3xl shadow-xl">
+                                        <span style="color: #34d399;" class="text-xs font-black uppercase tracking-widest block mb-2">Imam</span>
+                                        <span style="color: #ffffff;" class="text-xl md:text-2xl font-extrabold">{{ fridaySchedule?.imam || '-' }}</span>
+                                    </div>
+                                    <div style="background-color: #020617; border: 2px solid #059669;" class="p-6 rounded-3xl shadow-xl">
+                                        <span style="color: #34d399;" class="text-xs font-black uppercase tracking-widest block mb-2">Muadzin & Bilal</span>
+                                        <span style="color: #ffffff;" class="text-lg md:text-xl font-bold">{{ fridaySchedule?.muadzin || '-' }} / {{ fridaySchedule?.bilal || '-' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. WISHLIST / WAKAF PROGRAM SLIDE -->
+                            <div 
+                                v-else-if="currentSlide.type === 'wishlist'" 
+                                class="w-full h-full flex flex-col items-center justify-center text-center px-4"
+                            >
+                                <h2 style="color: #ffffff;" class="text-2xl md:text-3xl font-black uppercase tracking-tight mb-5">
+                                    Program Pengadaan & Wakaf Kebutuhan Masjid
+                                </h2>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
+                                    <div 
+                                        v-for="item in wishlists.slice(0, 2)" 
+                                        :key="item.id"
+                                        style="background-color: #020617; border: 1px solid #1e293b;"
+                                        class="p-4 rounded-2xl text-left flex flex-col justify-between"
+                                    >
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span style="color: #ffffff;" class="text-base font-extrabold truncate pr-2">{{ item.item_name }}</span>
+                                            <span style="color: #34d399;" class="text-lg font-black font-mono">{{ item.progress_percentage || 0 }}%</span>
+                                        </div>
+                                        <div style="background-color: #1e293b;" class="w-full rounded-full h-3 overflow-hidden mb-2">
+                                            <div 
+                                                style="background: linear-gradient(to right, #10b981, #fbbf24);"
+                                                class="h-full rounded-full transition-all duration-700"
+                                                :style="{ width: Math.min(item.progress_percentage || 0, 100) + '%' }"
+                                            ></div>
+                                        </div>
+                                        <div style="color: #94a3b8;" class="flex justify-between text-[11px] font-bold">
+                                            <span>Terkumpul: <strong style="color: #6ee7b7;">{{ item.formatted_total_fulfilled }}</strong></span>
+                                            <span>Target: <strong style="color: #ffffff;">{{ item.formatted_total_target }}</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- RIGHT SIDEBAR (4 Cols on LG): PRAYER TIMES ANCHOR -->
-            <div class="lg:col-span-4 flex flex-col gap-4">
-                
-                <!-- Next Prayer Highlight Card -->
-                <div v-if="nextPrayer" style="background-color: #0f172a; border: 2px solid #10b981;" class="rounded-3xl p-5 shadow-2xl relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-2">
-                        <span style="background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #059669;" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest">
-                            Sholat Berikutnya
-                        </span>
-                        <span style="background-color: #020617; color: #34d399; border: 1px solid #1e293b;" class="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full">
-                            {{ nextPrayer.tomorrow ? 'Besok' : 'Hari Ini' }}
-                        </span>
-                    </div>
-
-                    <div class="flex justify-between items-baseline my-2">
-                        <span style="color: #ffffff;" class="text-3xl font-black uppercase tracking-tight">{{ nextPrayer.name }}</span>
-                        <span style="color: #fbbf24;" class="text-4xl font-black font-mono">{{ nextPrayer.time }}</span>
-                    </div>
-
-                    <div style="background-color: #020617; border: 1px solid #1e293b;" class="rounded-2xl p-3 flex justify-between items-center mt-3">
-                        <span style="color: #94a3b8;" class="text-[11px] font-bold uppercase tracking-wider">Hitung Mundur:</span>
-                        <span style="color: #34d399;" class="text-lg font-black font-mono animate-pulse">{{ prayerCountdown }}</span>
-                    </div>
+                    </Transition>
                 </div>
 
-                <!-- Prayer Times List Container -->
-                <div style="background-color: #0f172a; border: 1px solid #1e293b;" class="rounded-3xl p-4 flex-1 shadow-2xl flex flex-col justify-between">
-                    <div style="border-bottom: 1px solid #1e293b;" class="flex items-center justify-between mb-3 pb-2">
-                        <h3 style="color: #cbd5e1;" class="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                            <span>⏱️</span> Jadwal Sholat Hari Ini
-                        </h3>
-                        <button @click="audioMuted = !audioMuted" style="background-color: #1e293b; color: #94a3b8; border: 1px solid #334155;" class="text-[10px] px-2 py-0.5 rounded cursor-pointer">
-                            {{ audioMuted ? '🔇 Mute' : '🔊 Audio On' }}
-                        </button>
-                    </div>
-
-                    <!-- Prayer Time List Rows -->
-                    <div class="space-y-2 flex-1 flex flex-col justify-center">
-                        <div 
-                            v-for="prayer in prayerTimesList" 
-                            :key="prayer.name"
-                            :style="nextPrayer?.name === prayer.name 
-                                ? 'background-color: #059669; border: 2px solid #34d399; color: #ffffff;' 
-                                : 'background-color: #020617; border: 1px solid #1e293b; color: #f1f5f9;'"
-                            class="flex justify-between items-center px-4 py-2.5 rounded-2xl transition-all duration-300 shadow-md"
-                        >
-                            <span class="text-sm font-extrabold uppercase tracking-wide">{{ prayer.name }}</span>
-                            <span class="text-xl font-black font-mono">{{ prayer.time }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Friday Officers Box (Shown on Fridays) -->
-                    <div v-if="isFriday && fridaySchedule" style="border-top: 1px solid #1e293b;" class="mt-3 pt-3 text-[11px] space-y-1">
-                        <div style="color: #34d399;" class="font-bold uppercase tracking-wider mb-1">🕌 Petugas Sholat Jumat</div>
-                        <div style="color: #cbd5e1;" class="flex justify-between"><span style="color: #64748b;">Khatib:</span><span class="font-bold">{{ fridaySchedule.khatib }}</span></div>
-                        <div style="color: #cbd5e1;" class="flex justify-between"><span style="color: #64748b;">Imam:</span><span class="font-bold">{{ fridaySchedule.imam }}</span></div>
-                    </div>
-                </div>
             </div>
 
         </main>
 
         <!-- ------------------------------------------------------------- -->
-        <!-- BOTTOM RUNNING TICKER FOOTER                                  -->
+        <!-- PRAYER TIMES BAR (6 Balanced, Clear, Legible Slots)          -->
         <!-- ------------------------------------------------------------- -->
-        <footer style="background-color: #064e3b; border-top: 2px solid #047857;" class="flex items-center overflow-hidden shadow-2xl relative shrink-0">
-            <div style="background-color: #047857; color: #ffffff;" class="px-6 py-3 font-black text-sm md:text-base tracking-wider uppercase shrink-0 shadow-2xl z-20 flex items-center gap-2">
-                <span>📢</span> INFORMASI MASJID
+        <section style="height: 100px; background-color: #0f172a; border-top: 2px solid #1e293b;" class="px-6 py-2.5 flex items-center justify-between shrink-0 z-20">
+            <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; width: 100%; height: 100%;">
+                
+                <div 
+                    v-for="prayer in prayerTimesList" 
+                    :key="prayer.name"
+                    :style="isNextPrayer(prayer.name) 
+                        ? 'background: linear-gradient(135deg, #065f46 0%, #047857 100%); border: 2px solid #34d399; box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);' 
+                        : 'background-color: #020617; border: 1px solid #1e293b;'"
+                    class="h-full rounded-2xl flex flex-col items-center justify-center p-1.5 transition-all duration-300 relative overflow-hidden"
+                >
+                    <!-- Active Indicator Pill for Next Prayer -->
+                    <div 
+                        v-if="isNextPrayer(prayer.name)" 
+                        style="background-color: #fbbf24; color: #020617;"
+                        class="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full mb-0.5 leading-none shadow"
+                    >
+                        SELANJUTNYA
+                    </div>
+
+                    <!-- Prayer Name -->
+                    <span 
+                        :style="isNextPrayer(prayer.name) ? 'color: #a7f3d0;' : 'color: #94a3b8;'"
+                        :class="isNextPrayer(prayer.name) ? 'font-black' : 'font-bold'"
+                        class="text-xs uppercase tracking-wider leading-none"
+                    >
+                        {{ prayer.name }}
+                    </span>
+
+                    <!-- Prayer Time (Clear, Legible, Crisp Digital Number) -->
+                    <span 
+                        :style="isNextPrayer(prayer.name) ? 'color: #ffffff;' : 'color: #ffffff;'"
+                        class="font-mono font-black text-2xl md:text-3xl tracking-tight leading-none mt-1"
+                    >
+                        {{ prayer.time }}
+                    </span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ------------------------------------------------------------- -->
+        <!-- RUNNING TICKER FOOTER BAR                                     -->
+        <!-- ------------------------------------------------------------- -->
+        <footer style="height: 44px; background-color: #064e3b; border-top: 2px solid #047857;" class="flex items-center overflow-hidden relative shrink-0 z-20">
+            <!-- Label Badge -->
+            <div style="background-color: #047857; color: #ffffff;" class="h-full px-5 flex items-center font-black text-xs uppercase tracking-wider shrink-0 z-10 shadow-lg gap-2">
+                <span>📢</span> PENGUMUMAN
             </div>
             
+            <!-- Marquee Running Text -->
             <div class="flex-1 overflow-hidden">
-                <div style="color: #ecfdf5;" class="animate-marquee whitespace-nowrap text-base md:text-lg font-bold tracking-wide">
+                <div style="color: #ecfdf5;" class="animate-marquee whitespace-nowrap text-sm md:text-base font-bold">
                     {{ tickerContent }}{{ tickerContent }}
                 </div>
             </div>
 
-            <!-- Demo Button Shortcut Hint -->
-            <button 
-                @click="showDemoControls = !showDemoControls" 
-                style="background-color: #0f172a; color: #94a3b8; border-left: 1px solid #1e293b;"
-                class="shrink-0 px-3 py-3 text-[11px] font-mono transition-colors z-20 cursor-pointer"
-            >
-                ⌨️ Demo [D]
-            </button>
+            <!-- Quick Action Buttons: Mute / Fullscreen / Demo -->
+            <div style="background-color: #020617; border-left: 1px solid #1e293b;" class="h-full flex items-center shrink-0 z-10">
+                <button 
+                    @click="audioMuted = !audioMuted" 
+                    :title="audioMuted ? 'Suara Dimatikan' : 'Suara Aktif'"
+                    style="color: #94a3b8;"
+                    class="h-full px-3 text-xs hover:text-white transition flex items-center gap-1 cursor-pointer bg-transparent border-none"
+                >
+                    {{ audioMuted ? '🔇' : '🔊' }}
+                </button>
+                <button 
+                    @click="toggleFullscreen" 
+                    title="Layar Penuh [F]"
+                    style="color: #94a3b8; border-left: 1px solid #1e293b;"
+                    class="h-full px-3 text-xs hover:text-white transition flex items-center gap-1 cursor-pointer bg-transparent border-none"
+                >
+                    {{ isFullscreen ? '⤓' : '⤢' }}
+                </button>
+                <button 
+                    @click="showDemoControls = !showDemoControls" 
+                    title="Panel Uji Coba [D]"
+                    style="color: #94a3b8; border-left: 1px solid #1e293b;"
+                    class="h-full px-3 text-xs font-mono hover:text-white transition cursor-pointer bg-transparent border-none"
+                >
+                    [D]
+                </button>
+            </div>
         </footer>
 
         <!-- ------------------------------------------------------------- -->
@@ -640,26 +757,26 @@ const prayerTimesList = computed(() => {
                     <h4 style="color: #34d399;" class="font-extrabold uppercase tracking-wider text-xs flex items-center gap-1.5">
                         🎛️ Panel Uji Coba Display
                     </h4>
-                    <button @click="showDemoControls = false" style="color: #94a3b8;" class="font-bold cursor-pointer">✕</button>
+                    <button @click="showDemoControls = false" style="color: #94a3b8;" class="hover:text-white font-bold cursor-pointer bg-transparent border-none">✕</button>
                 </div>
 
                 <div class="space-y-2">
-                    <button @click="triggerAdhan('Dzuhur')" style="background-color: rgba(16, 185, 129, 0.2); border: 1px solid #059669; color: #a7f3d0;" class="w-full text-left px-3 py-2 rounded-xl font-bold text-xs flex justify-between items-center cursor-pointer">
+                    <button @click="triggerAdhan('Dzuhur')" style="background-color: rgba(16, 185, 129, 0.2); border: 1px solid #059669; color: #a7f3d0;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
                         <span>🔔 Tes Layar Adhan & Bel</span>
                         <span>▶</span>
                     </button>
 
-                    <button @click="triggerIqamah('Dzuhur')" style="background-color: rgba(245, 158, 11, 0.2); border: 1px solid #d97706; color: #fde68a;" class="w-full text-left px-3 py-2 rounded-xl font-bold text-xs flex justify-between items-center cursor-pointer">
-                        <span>⏳ Tes Hitung Mundur Iqamah</span>
+                    <button @click="triggerIqamah('Dzuhur')" style="background-color: rgba(245, 158, 11, 0.2); border: 1px solid #d97706; color: #fde68a;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
+                        <span>⏳ Tes Countdown Iqamah</span>
                         <span>▶</span>
                     </button>
 
-                    <button @click="triggerStandby" style="background-color: rgba(244, 63, 94, 0.2); border: 1px solid #e11d48; color: #fecdd3;" class="w-full text-left px-3 py-2 rounded-xl font-bold text-xs flex justify-between items-center cursor-pointer">
+                    <button @click="triggerStandby" style="background-color: rgba(244, 63, 94, 0.2); border: 1px solid #e11d48; color: #fecdd3;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
                         <span>📱 Tes Standby Sholat</span>
                         <span>▶</span>
                     </button>
 
-                    <button @click="resetToNormal" style="background-color: #1e293b; color: #cbd5e1;" class="w-full text-left px-3 py-2 rounded-xl font-bold text-xs flex justify-between items-center cursor-pointer">
+                    <button @click="resetToNormal" style="background-color: #1e293b; color: #cbd5e1; border: 1px solid #334155;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
                         <span>🔄 Reset Tampilan Normal</span>
                         <span>↺</span>
                     </button>
@@ -671,13 +788,24 @@ const prayerTimesList = computed(() => {
 </template>
 
 <style scoped>
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-in-out;
+/* Peaceful & Soothing Slide Transition for Mosque TV */
+.peaceful-fade-enter-active,
+.peaceful-fade-leave-active {
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.98); }
-    to { opacity: 1; transform: scale(1); }
+.peaceful-fade-enter-from {
+    opacity: 0;
+    transform: scale(0.97);
+}
+
+.peaceful-fade-leave-to {
+    opacity: 0;
+    transform: scale(1.02);
 }
 
 .fade-enter-active,

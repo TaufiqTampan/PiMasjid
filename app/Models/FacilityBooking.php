@@ -81,13 +81,16 @@ class FacilityBooking extends Model
      */
     public function getDurationAttribute(): string
     {
-        if (!$this->start_time || !$this->end_time) return '-';
+        if (! $this->start_time || ! $this->end_time) {
+            return '-';
+        }
         $diff = $this->start_time->diff($this->end_time);
         $hours = $diff->h + ($diff->days * 24);
         $minutes = $diff->i;
         if ($minutes > 0) {
             return "{$hours} jam {$minutes} menit";
         }
+
         return "{$hours} jam";
     }
 
@@ -97,7 +100,7 @@ class FacilityBooking extends Model
     public static function generateBookingCode(): string
     {
         do {
-            $code = 'BK-' . strtoupper(substr(md5(uniqid()), 0, 8));
+            $code = 'BK-'.strtoupper(substr(md5(uniqid()), 0, 8));
         } while (static::where('booking_code', $code)->exists());
 
         return $code;

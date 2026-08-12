@@ -21,7 +21,7 @@ class PublicController extends Controller
             // Get location from settings
             $latitude = setting('location_latitude', '-6.200000');
             $longitude = setting('location_longitude', '106.816666');
-            
+
             $date = now()->format('d-m-Y');
             $response = Http::timeout(3)->get("http://api.aladhan.com/v1/timings/$date", [
                 'latitude' => $latitude,
@@ -31,13 +31,14 @@ class PublicController extends Controller
 
             if ($response->successful()) {
                 $timings = $response->json('data.timings');
+
                 return [
                     'Subuh' => $timings['Fajr'],
                     'Dzuhur' => $timings['Dhuhr'],
                     'Ashar' => $timings['Asr'],
                     'Maghrib' => $timings['Maghrib'],
                     'Isya' => $timings['Isha'],
-                    'date' => now()->translatedFormat('l, d F Y')
+                    'date' => now()->translatedFormat('l, d F Y'),
                 ];
             }
         } catch (\Exception $e) {
@@ -51,7 +52,7 @@ class PublicController extends Controller
             'Ashar' => '15:20',
             'Maghrib' => '18:10',
             'Isya' => '19:25',
-            'date' => now()->translatedFormat('l, d F Y')
+            'date' => now()->translatedFormat('l, d F Y'),
         ];
     }
 
@@ -64,12 +65,12 @@ class PublicController extends Controller
             ->orderBy('order')
             ->get()
             ->groupBy('division');
-        
+
         return Inertia::render('Public/Struktur', [
             'committee' => $committee,
         ]);
     }
-    
+
     public function keuangan(): Response
     {
         // Get latest 50 approved transactions
@@ -78,7 +79,7 @@ class PublicController extends Controller
             ->latest('date')
             ->take(50)
             ->get()
-            ->map(fn($t) => [
+            ->map(fn ($t) => [
                 'id' => $t->id,
                 'uuid' => $t->uuid,
                 'type' => $t->type,
@@ -90,40 +91,40 @@ class PublicController extends Controller
                 'proof_url' => $t->proof_url,
                 'verified_by_name' => $t->verifiedBy?->name,
             ]);
-        
+
         // Financial summary
         $totalIncome = Transaction::income()->approved()->sum('amount');
         $totalExpense = Transaction::expense()->approved()->sum('amount');
         $balance = $totalIncome - $totalExpense;
-        
+
         return Inertia::render('Public/Keuangan', [
             'transactions' => $transactions,
             'summary' => [
                 'income' => $totalIncome,
                 'expense' => $totalExpense,
                 'balance' => $balance,
-                'formatted_income' => 'Rp ' . number_format($totalIncome, 0, ',', '.'),
-                'formatted_expense' => 'Rp ' . number_format($totalExpense, 0, ',', '.'),
-                'formatted_balance' => 'Rp ' . number_format($balance, 0, ',', '.'),
+                'formatted_income' => 'Rp '.number_format($totalIncome, 0, ',', '.'),
+                'formatted_expense' => 'Rp '.number_format($totalExpense, 0, ',', '.'),
+                'formatted_balance' => 'Rp '.number_format($balance, 0, ',', '.'),
             ],
         ]);
     }
-    
+
     public function aset(): Response
     {
         $assets = Asset::latest()->get();
-        
+
         return Inertia::render('Public/Aset', [
             'assets' => $assets,
         ]);
     }
-    
+
     public function galeri(): Response
     {
         $slides = Slide::where('is_active', true)
             ->orderBy('order')
             ->get();
-        
+
         return Inertia::render('Public/Galeri', [
             'slides' => $slides,
         ]);
@@ -137,7 +138,7 @@ class PublicController extends Controller
             ->with('author')
             ->latest('published_at')
             ->paginate(9)
-            ->through(fn($post) => [
+            ->through(fn ($post) => [
                 'id' => $post->id,
                 'title' => $post->title,
                 'slug' => $post->slug,
@@ -148,13 +149,13 @@ class PublicController extends Controller
             ]);
 
         return Inertia::render('Public/Berita', [
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
     public function post(\App\Models\Post $post): Response
     {
-        if (!$post->is_published) {
+        if (! $post->is_published) {
             abort(404);
         }
 
@@ -168,7 +169,7 @@ class PublicController extends Controller
                 'published_at' => $post->published_at->translatedFormat('l, d F Y'),
                 'author_name' => $post->author->name,
                 // Add related posts if needed later
-            ]
+            ],
         ]);
     }
 
@@ -184,7 +185,7 @@ class PublicController extends Controller
         ];
 
         return Inertia::render('Public/Tentang', [
-            'about' => $settings
+            'about' => $settings,
         ]);
     }
 
@@ -193,14 +194,14 @@ class PublicController extends Controller
         // Get next Friday date
         $nextFridayStr = $this->getNextFriday(); // Returns "d F Y" string, but we need date object for query if storing as date...
         // Actually getNextFriday returns formatted string. Let's fix this helper or just find by date logic.
-        
+
         // Better logic: Find the upcoming Friday Schedule from DB
         // If we want exact match for "this week friday":
         $today = now();
         $targetDate = $today->dayOfWeek == Carbon::FRIDAY ? $today : $today->next(Carbon::FRIDAY);
-        
+
         $schedule = \App\Models\FridaySchedule::whereDate('date', $targetDate)->first();
-        
+
         $scheduleData = $schedule ? [
             'date' => $schedule->date->translatedFormat('d F Y'),
             'time' => \Carbon\Carbon::parse($schedule->time)->format('H:i'),
@@ -215,19 +216,19 @@ class PublicController extends Controller
             'khatib' => '-',
             'imam' => '-',
             'muadzin' => '-',
-            'bilal' => '-'
+            'bilal' => '-',
         ];
 
         return Inertia::render('Public/Jumat', [
             'schedule' => $scheduleData,
-            'prayerTimes' => $this->getPrayerTimes()
+            'prayerTimes' => $this->getPrayerTimes(),
         ]);
     }
 
     public function jadwal(): Response
     {
         return Inertia::render('Public/Jadwal', [
-            'prayerTimes' => $this->getPrayerTimes()
+            'prayerTimes' => $this->getPrayerTimes(),
         ]);
     }
 
@@ -249,7 +250,7 @@ class PublicController extends Controller
                     'id' => $agenda->id,
                     'title' => $agenda->title,
                     'date' => \Carbon\Carbon::parse($agenda->date)->translatedFormat('l, d F Y'),
-                    'time' => \Carbon\Carbon::parse($agenda->time)->format('H:i') . ' WIB',
+                    'time' => \Carbon\Carbon::parse($agenda->time)->format('H:i').' WIB',
                     'location' => $agenda->location,
                     'description' => $agenda->description ?? '-',
                     // 'speaker' is not in DB yet, but could be added later or part of description
@@ -257,7 +258,7 @@ class PublicController extends Controller
             });
 
         return Inertia::render('Public/Agenda', [
-            'agendas' => $agendas
+            'agendas' => $agendas,
         ]);
     }
 
@@ -272,7 +273,7 @@ class PublicController extends Controller
                 'instructor' => 'Ustadz Hamzah Al-Hafizh',
                 'level' => 'Semua Tingkatan',
                 'badge' => 'Pendaftaran Buka',
-                'icon' => '📖'
+                'icon' => '📖',
             ],
             [
                 'title' => 'Kajian Riyadhus Shalihin',
@@ -282,7 +283,7 @@ class PublicController extends Controller
                 'instructor' => 'Ustadz Ahmad Fauzi, Lc.',
                 'level' => 'Umum',
                 'badge' => 'Rutin',
-                'icon' => '📚'
+                'icon' => '📚',
             ],
             [
                 'title' => 'Halaqah Tafsir Al-Quran',
@@ -292,7 +293,7 @@ class PublicController extends Controller
                 'instructor' => 'Dr. KH. Abdullah Hakim',
                 'level' => 'Umum',
                 'badge' => 'Rutin',
-                'icon' => '🕌'
+                'icon' => '🕌',
             ],
             [
                 'title' => 'Bahasa Arab Dasar (Al-Muyassar)',
@@ -302,7 +303,7 @@ class PublicController extends Controller
                 'instructor' => 'Ustadz Rahmat Hidayat, B.A.',
                 'level' => 'Pemula',
                 'badge' => 'Angkatan Baru',
-                'icon' => '✍️'
+                'icon' => '✍️',
             ],
             [
                 'title' => 'Kajian Fiqih Ibadah',
@@ -312,7 +313,7 @@ class PublicController extends Controller
                 'instructor' => 'KH. Zainal Arifin, M.A.',
                 'level' => 'Umum',
                 'badge' => 'Rutin',
-                'icon' => '⚖️'
+                'icon' => '⚖️',
             ],
             [
                 'title' => 'Tahfidz Al-Quran Dewasa',
@@ -322,8 +323,8 @@ class PublicController extends Controller
                 'instructor' => 'Ustadz Bilal Al-Fatih',
                 'level' => 'Khusus Dewasa',
                 'badge' => 'Quota Terbatas',
-                'icon' => '🌟'
-            ]
+                'icon' => '🌟',
+            ],
         ];
 
         $lectures = \App\Models\Lecture::where('is_active', true)
@@ -353,6 +354,7 @@ class PublicController extends Controller
         if ($now->dayOfWeek === Carbon::FRIDAY) {
             return $now->translatedFormat('d F Y');
         }
+
         return $now->next(Carbon::FRIDAY)->translatedFormat('d F Y');
     }
 }

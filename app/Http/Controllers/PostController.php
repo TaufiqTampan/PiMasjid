@@ -19,7 +19,7 @@ class PostController extends Controller
             ->get();
 
         return Inertia::render('Posts/Index', [
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
@@ -39,7 +39,7 @@ class PostController extends Controller
 
         $imagePath = null;
         $cloudinaryPublicId = null;
-        
+
         if ($request->hasFile('photo')) {
             $result = CloudinaryService::upload($request->file('photo'), 'posts');
             $imagePath = $result['url'];
@@ -49,7 +49,7 @@ class PostController extends Controller
         $excerpt = $validated['excerpt'];
         if (empty($excerpt)) {
             $excerpt = strip_tags($validated['content']);
-            $excerpt = mb_substr($excerpt, 0, 160) . (mb_strlen($excerpt) > 160 ? '...' : '');
+            $excerpt = mb_substr($excerpt, 0, 160).(mb_strlen($excerpt) > 160 ? '...' : '');
         }
 
         Post::create([
@@ -59,7 +59,7 @@ class PostController extends Controller
             'image_path' => $imagePath,
             'cloudinary_public_id' => $cloudinaryPublicId,
             'is_published' => $validated['is_published'] ?? false,
-            'published_at' => !empty($validated['published_at']) ? $validated['published_at'] : (($validated['is_published'] ?? false) ? now() : null),
+            'published_at' => ! empty($validated['published_at']) ? $validated['published_at'] : (($validated['is_published'] ?? false) ? now() : null),
             'author_id' => auth()->id(),
         ]);
 
@@ -85,7 +85,7 @@ class PostController extends Controller
             if ($post->cloudinary_public_id) {
                 CloudinaryService::delete($post->cloudinary_public_id);
             }
-            
+
             $result = CloudinaryService::upload($request->file('photo'), 'posts');
             $post->image_path = $result['url'];
             $post->cloudinary_public_id = $result['public_id'];
@@ -93,21 +93,21 @@ class PostController extends Controller
 
         $post->title = $validated['title'];
         $post->excerpt = $validated['excerpt'];
-        
+
         if (empty($post->excerpt)) {
             $excerpt = strip_tags($validated['content']);
-            $post->excerpt = mb_substr($excerpt, 0, 160) . (mb_strlen($excerpt) > 160 ? '...' : '');
+            $post->excerpt = mb_substr($excerpt, 0, 160).(mb_strlen($excerpt) > 160 ? '...' : '');
         }
 
         $post->content = $validated['content'];
         $post->is_published = $validated['is_published'];
-        
+
         if (isset($validated['published_at'])) {
             $post->published_at = $validated['published_at'];
-        } elseif ($post->is_published && !$post->published_at) {
+        } elseif ($post->is_published && ! $post->published_at) {
             $post->published_at = now();
         }
-        
+
         $post->save();
 
         return redirect()->back()->with('success', 'Berita berhasil diperbarui.');
@@ -122,7 +122,7 @@ class PostController extends Controller
         if ($post->cloudinary_public_id) {
             CloudinaryService::delete($post->cloudinary_public_id);
         }
-        
+
         $post->delete();
 
         return redirect()->back()->with('success', 'Berita berhasil dihapus.');

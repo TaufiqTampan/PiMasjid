@@ -35,7 +35,7 @@ class CommitteeMemberSeeder extends Seeder
                 'order' => 3,
                 'is_active' => true,
             ],
-            
+
             // Divisions (Seksi)
             [
                 'name' => 'Umar Bakri',

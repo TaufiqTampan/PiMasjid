@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
@@ -82,7 +82,7 @@ class Zakat extends Model
     protected function formattedAmount(): Attribute
     {
         return Attribute::make(
-            get: fn () => 'Rp ' . number_format($this->amount, 0, ',', '.'),
+            get: fn () => 'Rp '.number_format($this->amount, 0, ',', '.'),
         );
     }
 

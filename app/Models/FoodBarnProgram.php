@@ -40,12 +40,13 @@ class FoodBarnProgram extends Model
      */
     public function getImageUrlAttribute($value)
     {
-        if (!$value) {
+        if (! $value) {
             return 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop';
         }
-        return str_starts_with($value, 'http') 
-            ? $value 
-            : asset('storage/' . $value);
+
+        return str_starts_with($value, 'http')
+            ? $value
+            : asset('storage/'.$value);
     }
 
     /**
@@ -53,8 +54,11 @@ class FoodBarnProgram extends Model
      */
     public function getFormattedProgressAttribute(): string
     {
-        if ($this->target_amount <= 0) return '0%';
+        if ($this->target_amount <= 0) {
+            return '0%';
+        }
         $pct = ($this->collected_amount / $this->target_amount) * 100;
-        return round(min($pct, 100)) . '%';
+
+        return round(min($pct, 100)).'%';
     }
 }

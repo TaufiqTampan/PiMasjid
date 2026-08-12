@@ -52,10 +52,13 @@ class Facility extends Model
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image_path) return null;
+        if (! $this->image_path) {
+            return null;
+        }
+
         return str_starts_with($this->image_path, 'http')
             ? $this->image_path
-            : asset('storage/' . $this->image_path);
+            : asset('storage/'.$this->image_path);
     }
 
     /**
@@ -80,7 +83,7 @@ class Facility extends Model
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->where(function ($inner) use ($startTime, $endTime) {
                     $inner->where('start_time', '<', $endTime)
-                          ->where('end_time', '>', $startTime);
+                        ->where('end_time', '>', $startTime);
                 });
             });
 

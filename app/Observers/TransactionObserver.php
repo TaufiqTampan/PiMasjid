@@ -12,15 +12,16 @@ class TransactionObserver
     public function creating(Transaction $transaction): void
     {
         $threshold = config('masjid.approval_threshold', 1000000);
-        
+
         // Auto-approve all income transactions
         if ($transaction->type === 'income') {
             $transaction->status = 'approved';
             $transaction->approved_at = now();
             $transaction->approved_by = auth()->id();
+
             return;
         }
-        
+
         // For expenses, check threshold
         if ($transaction->type === 'expense') {
             if ($transaction->amount > $threshold) {

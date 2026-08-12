@@ -27,7 +27,7 @@ class StoreTransactionRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string', 'max:1000'],
             'date' => ['required', 'date'],
-            'proof_image' => ['required_if:type,expense', 'nullable', 'image', 'mimes:jpg,jpeg,png,pdf', 'max:' . (5 * 1024)], // 5MB max
+            'proof_image' => ['required_if:type,expense', 'nullable', 'image', 'mimes:jpg,jpeg,png,pdf', 'max:'.(5 * 1024)], // 5MB max
         ];
     }
 

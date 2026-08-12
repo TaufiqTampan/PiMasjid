@@ -30,11 +30,12 @@ class Lecture extends Model
     // Accessors
     public function getImageUrlAttribute()
     {
-        if (!$this->image_path) {
+        if (! $this->image_path) {
             return 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600';
         }
-        return str_starts_with($this->image_path, 'http') 
-            ? $this->image_path 
-            : asset('storage/' . $this->image_path);
+
+        return str_starts_with($this->image_path, 'http')
+            ? $this->image_path
+            : asset('storage/'.$this->image_path);
     }
 }

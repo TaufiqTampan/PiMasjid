@@ -17,7 +17,7 @@ class LectureController extends Controller
         $lectures = Lecture::latest('date')
             ->when(request('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
-                      ->orWhere('speaker', 'like', "%{$search}%");
+                    ->orWhere('speaker', 'like', "%{$search}%");
             })
             ->get();
 

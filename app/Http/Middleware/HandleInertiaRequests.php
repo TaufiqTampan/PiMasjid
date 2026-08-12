@@ -2,10 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-
-use App\Models\Setting;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,10 +34,10 @@ class HandleInertiaRequests extends Middleware
 
         // Optimized settings fetch: key => value pairs
         // Cache for 60 minutes to improve performance
-        $settings = \Illuminate\Support\Facades\Cache::remember('global_settings', 60*60, function () {
+        $settings = \Illuminate\Support\Facades\Cache::remember('global_settings', 60 * 60, function () {
             return Setting::all()->pluck('value', 'key');
         });
-        
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -47,8 +46,8 @@ class HandleInertiaRequests extends Middleware
             'settings' => $settings,
             'isImpersonating' => session()->has('impersonated_by'),
             // Pending approvals count for Ketua badge (performance optimization)
-            'pendingApprovalsCount' => $user && $user->role === 'ketua' 
-                ? \App\Models\Transaction::pending()->count() 
+            'pendingApprovalsCount' => $user && $user->role === 'ketua'
+                ? \App\Models\Transaction::pending()->count()
                 : 0,
         ];
     }

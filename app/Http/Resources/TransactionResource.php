@@ -26,8 +26,8 @@ class TransactionResource extends JsonResource
             'formatted_date' => $this->date->format('d M Y'),
             'status_label' => $this->status_label,
             'proof_url' => $this->proof_url,
-            'has_proof' => !empty($this->proof_image_path),
-            'verified_by_name' => $this->whenLoaded('verifiedBy', fn() => $this->verifiedBy->name),
+            'has_proof' => ! empty($this->proof_image_path),
+            'verified_by_name' => $this->whenLoaded('verifiedBy', fn () => $this->verifiedBy->name),
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }

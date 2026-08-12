@@ -19,7 +19,7 @@ class PublicFacilityController extends Controller
             ->orderBy('facility_type')
             ->orderBy('name')
             ->get()
-            ->map(fn($f) => [
+            ->map(fn ($f) => [
                 'id' => $f->id,
                 'name' => $f->name,
                 'slug' => $f->slug,
@@ -55,7 +55,7 @@ class PublicFacilityController extends Controller
         $facility = Facility::findOrFail($validated['facility_id']);
 
         // Check availability
-        if (!$facility->isAvailable($validated['start_time'], $validated['end_time'])) {
+        if (! $facility->isAvailable($validated['start_time'], $validated['end_time'])) {
             return redirect()->back()
                 ->withErrors(['start_time' => 'Fasilitas tidak tersedia pada waktu tersebut. Silakan pilih waktu lain.'])
                 ->withInput();
@@ -77,7 +77,7 @@ class PublicFacilityController extends Controller
     {
         $code = $request->input('code');
 
-        if (!$code) {
+        if (! $code) {
             return response()->json(['error' => 'Kode booking diperlukan.'], 422);
         }
 
@@ -85,7 +85,7 @@ class PublicFacilityController extends Controller
             ->where('booking_code', strtoupper($code))
             ->first();
 
-        if (!$booking) {
+        if (! $booking) {
             return response()->json(['error' => 'Kode booking tidak ditemukan.'], 404);
         }
 

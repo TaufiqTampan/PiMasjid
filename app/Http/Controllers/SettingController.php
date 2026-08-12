@@ -12,9 +12,9 @@ class SettingController extends Controller
     public function index()
     {
         $settings = Setting::all()->groupBy('group');
-        
+
         return Inertia::render('Settings/Index', [
-            'settings' => $settings
+            'settings' => $settings,
         ]);
     }
 
@@ -28,22 +28,22 @@ class SettingController extends Controller
 
         foreach ($request->settings as $item) {
             $setting = Setting::where('key', $item['key'])->first();
-            
+
             // Handle Image Upload to Cloudinary
             if ($setting->type === 'image' && isset($item['file']) && $item['file'] instanceof \Illuminate\Http\UploadedFile) {
                 // Delete old image from Cloudinary if exists
                 if ($setting->cloudinary_public_id) {
                     CloudinaryService::delete($setting->cloudinary_public_id);
                 }
-                
+
                 // Upload to Cloudinary
                 $result = CloudinaryService::upload($item['file'], 'settings');
                 $setting->value = $result['url'];
                 $setting->cloudinary_public_id = $result['public_id'];
             } elseif ($setting->type !== 'image') {
-                 $setting->value = $item['value'];
+                $setting->value = $item['value'];
             }
-            
+
             $setting->save();
         }
 

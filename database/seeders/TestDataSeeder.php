@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\PrayerTime;
-use App\Models\Transaction;
 use App\Models\Slide;
-use App\Models\Wishlist;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Database\Seeder;
 
 class TestDataSeeder extends Seeder
@@ -183,7 +183,7 @@ class TestDataSeeder extends Seeder
         $prayerTime = PrayerTime::first();
         $this->command->line("  - Formatted Date: {$prayerTime->formatted_date}");
         $this->command->line("  - Formatted Subuh: {$prayerTime->formatted_subuh}");
-        $this->command->line("  - Scope Today Count: " . PrayerTime::today()->count());
+        $this->command->line('  - Scope Today Count: '.PrayerTime::today()->count());
 
         // Test Transaction model
         $this->command->newLine();
@@ -192,15 +192,15 @@ class TestDataSeeder extends Seeder
         $this->command->line("  - UUID: {$transaction->uuid}");
         $this->command->line("  - Formatted Amount: {$transaction->formatted_amount}");
         $this->command->line("  - Status Label: {$transaction->status_label}");
-        $this->command->line("  - Income Count: " . Transaction::income()->count());
-        $this->command->line("  - Expense Count: " . Transaction::expense()->count());
+        $this->command->line('  - Income Count: '.Transaction::income()->count());
+        $this->command->line('  - Expense Count: '.Transaction::expense()->count());
 
         // Test Slide model
         $this->command->newLine();
         $this->command->info('🖼️ Slide Model:');
         $slide = Slide::first();
         $this->command->line("  - Status Label: {$slide->status_label}");
-        $this->command->line("  - Active Slides: " . Slide::active()->count());
+        $this->command->line('  - Active Slides: '.Slide::active()->count());
 
         // Test Wishlist model
         $this->command->newLine();
@@ -210,8 +210,8 @@ class TestDataSeeder extends Seeder
         $this->command->line("  - Total Target: {$wishlist->formatted_total_target}");
         $this->command->line("  - Progress: {$wishlist->progress_percentage}%");
         $this->command->line("  - Remaining Qty: {$wishlist->remaining_qty}");
-        $this->command->line("  - Active Count: " . Wishlist::active()->count());
-        $this->command->line("  - Completed Count: " . Wishlist::completed()->count());
+        $this->command->line('  - Active Count: '.Wishlist::active()->count());
+        $this->command->line('  - Completed Count: '.Wishlist::completed()->count());
 
         $this->command->newLine();
         $this->command->info('✅ All model features working correctly!');

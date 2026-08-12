@@ -49,7 +49,7 @@ class AssetExport implements FromCollection, WithHeadings, WithMapping, WithStyl
 
     private function translateCondition($condition)
     {
-        return match($condition) {
+        return match ($condition) {
             'good' => 'Baik',
             'damaged' => 'Rusak',
             'lost' => 'Hilang',

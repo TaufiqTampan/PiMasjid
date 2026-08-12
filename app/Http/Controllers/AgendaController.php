@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Agenda;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class AgendaController extends Controller
 {
@@ -35,7 +35,7 @@ class AgendaController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
+        $validated['slug'] = Str::slug($validated['title']).'-'.Str::random(6);
 
         Agenda::create($validated);
 
@@ -55,7 +55,7 @@ class AgendaController extends Controller
         ]);
 
         if ($agenda->title !== $validated['title']) {
-            $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
+            $validated['slug'] = Str::slug($validated['title']).'-'.Str::random(6);
         }
 
         $agenda->update($validated);

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
@@ -63,7 +63,7 @@ class Qurban extends Model
             if (empty($qurban->uuid)) {
                 $qurban->uuid = (string) Str::uuid();
             }
-            
+
             // Auto-generate share_group_id if shared but not yet assigned
             if ($qurban->is_shared && empty($qurban->share_group_id)) {
                 $qurban->share_group_id = (string) Str::uuid();
@@ -101,7 +101,7 @@ class Qurban extends Model
     protected function formattedPrice(): Attribute
     {
         return Attribute::make(
-            get: fn () => 'Rp ' . number_format($this->animal_price, 0, ',', '.'),
+            get: fn () => 'Rp '.number_format($this->animal_price, 0, ',', '.'),
         );
     }
 
@@ -145,11 +145,12 @@ class Qurban extends Model
     {
         return Attribute::make(
             get: function () {
-                if (!$this->is_shared) {
+                if (! $this->is_shared) {
                     return 'Individual';
                 }
-                
+
                 $groupCode = substr($this->share_group_id, 0, 8);
+
                 return "{$this->share_position}/{$this->share_count} dari {$this->animalTypeLabel} Grup {$groupCode}";
             },
         );

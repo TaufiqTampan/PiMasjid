@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class PrayerTimeController extends Controller
 {
@@ -19,7 +19,7 @@ class PrayerTimeController extends Controller
         $lat = $request->input('latitude');
         $long = $request->input('longitude');
         $date = now()->format('Y-m-d');
-        
+
         // Cache key specific to location (rounded) and date
         // Rounding to 3 decimals (~110m) to group nearby users and improve cache hit rate
         $latKey = round($lat, 3);
@@ -36,6 +36,7 @@ class PrayerTimeController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json()['data']['timings'];
+
                 return [
                     'subuh' => $data['Fajr'],
                     'dzuhur' => $data['Dhuhr'],
@@ -44,11 +45,11 @@ class PrayerTimeController extends Controller
                     'isya' => $data['Isha'],
                 ];
             }
-            
+
             return null;
         });
 
-        if (!$times) {
+        if (! $times) {
             return response()->json(['error' => 'Failed to fetch prayer times'], 503);
         }
 

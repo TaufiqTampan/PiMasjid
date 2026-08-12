@@ -1,9 +1,10 @@
 <?php
+
 $zipFile = 'deploy.zip';
 $extractTo = './';
 
 $zip = new ZipArchive;
-if ($zip->open($zipFile) === TRUE) {
+if ($zip->open($zipFile) === true) {
     $zip->extractTo($extractTo);
     $zip->close();
     echo 'Extraction successful!<br>';
@@ -12,4 +13,3 @@ if ($zip->open($zipFile) === TRUE) {
 } else {
     echo 'Failed to open the zip file.';
 }
-?>

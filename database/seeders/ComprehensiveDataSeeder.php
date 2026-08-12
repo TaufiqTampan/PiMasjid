@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Transaction;
-use App\Models\Zakat;
-use App\Models\Qurban;
 use App\Models\Agenda;
 use App\Models\PrayerTime;
+use App\Models\Qurban;
 use App\Models\Slide;
-use App\Models\Wishlist;
+use App\Models\Transaction;
 use App\Models\User;
-use Illuminate\Database\Seeder;
+use App\Models\Wishlist;
+use App\Models\Zakat;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class ComprehensiveDataSeeder extends Seeder
@@ -22,16 +22,20 @@ class ComprehensiveDataSeeder extends Seeder
     public function run(): void
     {
         $this->command->info('🌱 Starting comprehensive data seeding...');
-        
+
         // Get users for transaction verification
         $admin = User::where('email', 'dev@masjid.com')->first();
         $bendahara = User::where('email', 'bendahara@masjid.com')->first();
         $ketua = User::where('email', 'ketua@masjid.com')->first();
 
         // Fallback if users not found (e.g. running standalone)
-        if (!$admin) $admin = User::first();
-        if (!$bendahara) $bendahara = User::first();
-        
+        if (! $admin) {
+            $admin = User::first();
+        }
+        if (! $bendahara) {
+            $bendahara = User::first();
+        }
+
         $this->seedTransactions($admin, $bendahara);
         $this->seedZakat($bendahara);
         $this->seedQurban($bendahara);
@@ -39,14 +43,14 @@ class ComprehensiveDataSeeder extends Seeder
         $this->seedPrayerTimes();
         $this->seedSlides();
         $this->seedWishlists();
-        
+
         $this->command->info('✅ Comprehensive data seeded successfully!');
     }
 
     private function seedTransactions($admin, $bendahara): void
     {
         $this->command->info('💰 Seeding transactions...');
-        
+
         $transactions = [
             // Income - Last 6 months
             ['type' => 'income', 'category' => 'Infaq', 'amount' => 200000, 'description' => 'Infaq Jumat pertama', 'date' => '2025-08-01', 'verified_by' => $bendahara->id],
@@ -68,7 +72,7 @@ class ComprehensiveDataSeeder extends Seeder
             ['type' => 'income', 'category' => 'Kotak Jumat', 'amount' => 1750000, 'description' => 'Kotak amal Jumat Januari pertama', 'date' => '2026-01-10', 'verified_by' => $admin->id],
             ['type' => 'income', 'category' => 'Infaq', 'amount' => 200000, 'description' => 'Infaq jamaah', 'date' => '2026-01-20', 'verified_by' => $admin->id],
             ['type' => 'income', 'category' => 'Donasi', 'amount' => 3500000, 'description' => 'Donasi perawatan', 'date' => '2026-01-22', 'verified_by' => $bendahara->id],
-            
+
             // Expenses - ALL MUST HAVE proof_image_path
             ['type' => 'expense', 'category' => 'Utilitas', 'amount' => 850000, 'description' => 'Listrik dan air Agustus', 'date' => '2025-08-05', 'verified_by' => $bendahara->id, 'proof_image_path' => 'transactions/default.jpg'],
             ['type' => 'expense', 'category' => 'Operasional', 'amount' => 500000, 'description' => 'Kebersihan dan pemeliharaan', 'date' => '2025-08-12', 'verified_by' => $admin->id, 'proof_image_path' => 'transactions/default.jpg'],
@@ -84,20 +88,20 @@ class ComprehensiveDataSeeder extends Seeder
             ['type' => 'expense', 'category' => 'Utilitas', 'amount' => 1100000, 'description' => 'Listrik dan air Desember', 'date' => '2025-12-05', 'verified_by' => $bendahara->id, 'proof_image_path' => 'transactions/default.jpg'],
             ['type' => 'expense', 'category' => 'Konsumsi', 'amount' => 850000, 'description' => 'Konsumsi tahun baru hijriah', 'date' => '2026-01-07', 'verified_by' => $admin->id, 'proof_image_path' => 'transactions/default.jpg'],
             ['type' => 'expense', 'category' => 'Operasional', 'amount' => 600000, 'description' => 'Honorarium marbot', 'date' => '2026-01-15', 'verified_by' => $bendahara->id, 'proof_image_path' => 'transactions/default.jpg'],
-           ['type' => 'expense', 'category' => 'Utilitas', 'amount' => 980000, 'description' => 'Listrik dan air Januari', 'date' => '2026-01-05', 'verified_by' => $bendahara->id, 'proof_image_path' => 'transactions/default.jpg'],
+            ['type' => 'expense', 'category' => 'Utilitas', 'amount' => 980000, 'description' => 'Listrik dan air Januari', 'date' => '2026-01-05', 'verified_by' => $bendahara->id, 'proof_image_path' => 'transactions/default.jpg'],
         ];
 
         foreach ($transactions as $data) {
             Transaction::create($data);
         }
 
-        $this->command->info('   ✓ Created ' . count($transactions) . ' transactions');
+        $this->command->info('   ✓ Created '.count($transactions).' transactions');
     }
 
     private function seedZakat($verifier): void
     {
         $this->command->info('📿 Seeding zakat data...');
-        
+
         $zakats = [
             // Fields: muzakki_name, muzakki_phone, type, amount, payment_type, person_count, year, date, collected_by
             ['muzakki_name' => 'Ahmad Fahrezi', 'muzakki_phone' => '081234567890', 'type' => 'fitrah', 'amount' => 35000, 'payment_type' => 'uang', 'person_count' => 1, 'year' => 1446, 'date' => '2025-09-08', 'collected_by' => $verifier->id],
@@ -119,13 +123,13 @@ class ComprehensiveDataSeeder extends Seeder
             Zakat::create($data);
         }
 
-        $this->command->info('   ✓ Created ' . count($zakats) . ' zakat records');
+        $this->command->info('   ✓ Created '.count($zakats).' zakat records');
     }
 
     private function seedQurban($verifier): void
     {
         $this->command->info('🐐 Seeding qurban data...');
-        
+
         $qurbans = [
             // Fields: participant_name, participant_phone, animal_type, animal_price, is_shared, status, year, registration_date, registered_by
             ['participant_name' => 'Haji Ahmad', 'participant_phone' => '081212341234', 'animal_type' => 'sapi', 'animal_price' => 21000000, 'is_shared' => false, 'status' => 'paid', 'year' => 1446, 'registration_date' => '2025-08-15', 'registered_by' => $verifier->id],
@@ -144,57 +148,57 @@ class ComprehensiveDataSeeder extends Seeder
             Qurban::create($data);
         }
 
-        $this->command->info('   ✓ Created ' . count($qurbans) . ' qurban records');
+        $this->command->info('   ✓ Created '.count($qurbans).' qurban records');
     }
 
     private function seedAgendas(): void
     {
         $this->command->info('📅 Seeding agendas...');
-        
+
         $agendas = [
             // Upcoming events
-            ['title' => 'Kajian Subuh Rutin', 'slug' => Str::slug('Kajian Subuh Rutin') . '-' . Str::random(6), 'description' => 'Kajian subuh setiap hari dengan tema tafsir Al-Quran', 'date' => Carbon::now()->addDays(1)->format('Y-m-d'), 'time' => '05:00', 'location' => 'Masjid Utama', 'is_active' => true],
-            ['title' => 'Pengajian Ahad Pagi', 'slug' => Str::slug('Pengajian Ahad Pagi') . '-' . Str::random(6), 'description' => 'Pengajian rutin setiap hari Ahad pagi', 'date' => Carbon::now()->next('Sunday')->format('Y-m-d'), 'time' => '07:00', 'location' => 'Aula Masjid', 'is_active' => true],
-            ['title' => 'Kajian Rabu Malam', 'slug' => Str::slug('Kajian Rabu Malam') . '-' . Str::random(6), 'description' => 'Kajian rutin malam Rabu dengan Ustadz Ahmad', 'date' => Carbon::now()->next('Wednesday')->format('Y-m-d'), 'time' => '19:30', 'location' => 'Masjid Utama', 'is_active' => true],
-            ['title' => 'Tarawih Ramadhan', 'slug' => Str::slug('Tarawih Ramadhan') . '-' . Str::random(6), 'description' => 'Sholat tarawih berjamaah setiap malam di bulan Ramadhan', 'date' => '2026-02-15', 'time' => '20:00', 'location' => 'Masjid Utama', 'is_active' => true],
-            ['title' => 'Buka Puasa Bersama', 'slug' => Str::slug('Buka Puasa Bersama') . '-' . Str::random(6), 'description' => 'Buka puasa bersama jamaah dan anak yatim', 'date' => '2026-02-20', 'time' => '18:00', 'location' => 'Halaman Masjid', 'is_active' => true],
-            ['title' => 'Kelas Tahsin Al-Quran', 'slug' => Str::slug('Kelas Tahsin Al-Quran') . '-' . Str::random(6), 'description' => 'Kelas perbaikan bacaan Al-Quran untuk jamaah', 'date' => Carbon::now()->addDays(5)->format('Y-m-d'), 'time' => '16:00', 'location' => 'Ruang Kelas', 'is_active' => true],
-            ['title' => 'Halaqah Hafalan Juz Amma', 'slug' => Str::slug('Halaqah Hafalan Juz Amma') . '-' . Str::random(6), 'description' => 'Program tahfidz juz amma untuk anak-anak', 'date' => Carbon::now()->addDays(3)->format('Y-m-d'), 'time' => '15:30', 'location' => 'Aula Masjid', 'is_active' => true],
-            
+            ['title' => 'Kajian Subuh Rutin', 'slug' => Str::slug('Kajian Subuh Rutin').'-'.Str::random(6), 'description' => 'Kajian subuh setiap hari dengan tema tafsir Al-Quran', 'date' => Carbon::now()->addDays(1)->format('Y-m-d'), 'time' => '05:00', 'location' => 'Masjid Utama', 'is_active' => true],
+            ['title' => 'Pengajian Ahad Pagi', 'slug' => Str::slug('Pengajian Ahad Pagi').'-'.Str::random(6), 'description' => 'Pengajian rutin setiap hari Ahad pagi', 'date' => Carbon::now()->next('Sunday')->format('Y-m-d'), 'time' => '07:00', 'location' => 'Aula Masjid', 'is_active' => true],
+            ['title' => 'Kajian Rabu Malam', 'slug' => Str::slug('Kajian Rabu Malam').'-'.Str::random(6), 'description' => 'Kajian rutin malam Rabu dengan Ustadz Ahmad', 'date' => Carbon::now()->next('Wednesday')->format('Y-m-d'), 'time' => '19:30', 'location' => 'Masjid Utama', 'is_active' => true],
+            ['title' => 'Tarawih Ramadhan', 'slug' => Str::slug('Tarawih Ramadhan').'-'.Str::random(6), 'description' => 'Sholat tarawih berjamaah setiap malam di bulan Ramadhan', 'date' => '2026-02-15', 'time' => '20:00', 'location' => 'Masjid Utama', 'is_active' => true],
+            ['title' => 'Buka Puasa Bersama', 'slug' => Str::slug('Buka Puasa Bersama').'-'.Str::random(6), 'description' => 'Buka puasa bersama jamaah dan anak yatim', 'date' => '2026-02-20', 'time' => '18:00', 'location' => 'Halaman Masjid', 'is_active' => true],
+            ['title' => 'Kelas Tahsin Al-Quran', 'slug' => Str::slug('Kelas Tahsin Al-Quran').'-'.Str::random(6), 'description' => 'Kelas perbaikan bacaan Al-Quran untuk jamaah', 'date' => Carbon::now()->addDays(5)->format('Y-m-d'), 'time' => '16:00', 'location' => 'Ruang Kelas', 'is_active' => true],
+            ['title' => 'Halaqah Hafalan Juz Amma', 'slug' => Str::slug('Halaqah Hafalan Juz Amma').'-'.Str::random(6), 'description' => 'Program tahfidz juz amma untuk anak-anak', 'date' => Carbon::now()->addDays(3)->format('Y-m-d'), 'time' => '15:30', 'location' => 'Aula Masjid', 'is_active' => true],
+
             // Past events
-            ['title' => 'Peringatan Maulid Nabi', 'slug' => Str::slug('Peringatan Maulid Nabi') . '-' . Str::random(6), 'description' => 'Peringatan maulid Nabi Muhammad SAW', 'date' => '2025-12-15', 'time' => '19:00', 'location' => 'Masjid Utama', 'is_active' => false],
-            ['title' => 'Santunan Anak Yatim', 'slug' => Str::slug('Santunan Anak Yatim') . '-' . Str::random(6), 'description' => 'Pemberian santunan kepada anak yatim', 'date' => '2025-11-20', 'time' => '09:00', 'location' => 'Aula Masjid', 'is_active' => false],
-            ['title' => 'Bakti Sosial Ramadhan', 'slug' => Str::slug('Bakti Sosial Ramadhan') . '-' . Str::random(6), 'description' => 'Pembagian sembako untuk warga kurang mampu', 'date' => '2025-09-25', 'time' => '10:00', 'location' => 'Halaman Masjid', 'is_active' => false],
+            ['title' => 'Peringatan Maulid Nabi', 'slug' => Str::slug('Peringatan Maulid Nabi').'-'.Str::random(6), 'description' => 'Peringatan maulid Nabi Muhammad SAW', 'date' => '2025-12-15', 'time' => '19:00', 'location' => 'Masjid Utama', 'is_active' => false],
+            ['title' => 'Santunan Anak Yatim', 'slug' => Str::slug('Santunan Anak Yatim').'-'.Str::random(6), 'description' => 'Pemberian santunan kepada anak yatim', 'date' => '2025-11-20', 'time' => '09:00', 'location' => 'Aula Masjid', 'is_active' => false],
+            ['title' => 'Bakti Sosial Ramadhan', 'slug' => Str::slug('Bakti Sosial Ramadhan').'-'.Str::random(6), 'description' => 'Pembagian sembako untuk warga kurang mampu', 'date' => '2025-09-25', 'time' => '10:00', 'location' => 'Halaman Masjid', 'is_active' => false],
         ];
 
         foreach ($agendas as $data) {
             Agenda::create($data);
         }
 
-        $this->command->info('   ✓ Created ' . count($agendas) . ' agenda items');
+        $this->command->info('   ✓ Created '.count($agendas).' agenda items');
     }
 
     private function seedPrayerTimes(): void
     {
         $this->command->info('🕌 Seeding prayer times...');
-        
-        $hijriMonths = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir', 
-                       'Rajab', 'Syaban', 'Ramadhan', 'Syawal', 'Dzulqaidah', 'Dzulhijjah'];
-        
+
+        $hijriMonths = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir',
+            'Rajab', 'Syaban', 'Ramadhan', 'Syawal', 'Dzulqaidah', 'Dzulhijjah'];
+
         for ($i = 0; $i < 30; $i++) {
             $date = Carbon::now()->addDays($i);
             $hijriDay = 20 + $i;
             $hijriMonth = $hijriMonths[6]; // Rajab
-            
+
             PrayerTime::create([
                 'date' => $date->format('Y-m-d'),
                 'hijri_date' => "$hijriDay $hijriMonth 1448",
-                'subuh' => '04:' . str_pad(30 + ($i % 5), 2, '0', STR_PAD_LEFT),
-                'sunrise' => '05:' . str_pad(45 + ($i % 5), 2, '0', STR_PAD_LEFT),
-                'dhuhr' => '12:' . str_pad($i % 10, 2, '0', STR_PAD_LEFT),
-                'asr' => '15:' . str_pad(15 + ($i % 10), 2, '0', STR_PAD_LEFT),
-                'maghrib' => '18:' . str_pad(20 + ($i % 10), 2, '0', STR_PAD_LEFT),
-                'isha' => '19:' . str_pad(30 + ($i % 10), 2, '0', STR_PAD_LEFT),
+                'subuh' => '04:'.str_pad(30 + ($i % 5), 2, '0', STR_PAD_LEFT),
+                'sunrise' => '05:'.str_pad(45 + ($i % 5), 2, '0', STR_PAD_LEFT),
+                'dhuhr' => '12:'.str_pad($i % 10, 2, '0', STR_PAD_LEFT),
+                'asr' => '15:'.str_pad(15 + ($i % 10), 2, '0', STR_PAD_LEFT),
+                'maghrib' => '18:'.str_pad(20 + ($i % 10), 2, '0', STR_PAD_LEFT),
+                'isha' => '19:'.str_pad(30 + ($i % 10), 2, '0', STR_PAD_LEFT),
             ]);
         }
 
@@ -204,7 +208,7 @@ class ComprehensiveDataSeeder extends Seeder
     private function seedSlides(): void
     {
         $this->command->info('📺 Seeding TV display slides...');
-        
+
         $slides = [
             ['title' => 'Jadwal Sholat Hari Ini', 'content' => 'Mari sholat berjamaah tepat waktu', 'image_path' => null, 'is_active' => true, 'order' => 1],
             ['title' => 'Transparansi Keuangan', 'content' => 'Laporan keuangan masjid dapat diakses melalui website', 'image_path' => null, 'is_active' => true, 'order' => 2],
@@ -220,13 +224,13 @@ class ComprehensiveDataSeeder extends Seeder
             Slide::create($data);
         }
 
-        $this->command->info('   ✓ Created ' . count($slides) . ' TV slides');
+        $this->command->info('   ✓ Created '.count($slides).' TV slides');
     }
 
     private function seedWishlists(): void
     {
         $this->command->info('🎁 Seeding wishlists...');
-        
+
         $wishlists = [
             ['item_name' => 'Karpet Masjid', 'target_qty' => 50, 'fulfilled_qty' => 32, 'unit_price' => 250000, 'status' => 'active', 'description' => 'Karpet untuk ruang sholat utama ukuran 120x600 cm'],
             ['item_name' => 'Al-Quran Terjemahan', 'target_qty' => 100, 'fulfilled_qty' => 100, 'unit_price' => 150000, 'status' => 'completed', 'description' => 'Al-Quran terjemahan untuk jamaah'],
@@ -240,6 +244,6 @@ class ComprehensiveDataSeeder extends Seeder
             Wishlist::create($data);
         }
 
-        $this->command->info('   ✓ Created ' . count($wishlists) . ' wishlist items');
+        $this->command->info('   ✓ Created '.count($wishlists).' wishlist items');
     }
 }

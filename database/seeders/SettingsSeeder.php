@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Setting;
+use Illuminate\Database\Seeder;
 
 class SettingsSeeder extends Seeder
 {
@@ -147,7 +147,7 @@ class SettingsSeeder extends Seeder
                 'group' => 'footer',
                 'label' => 'Teks Copyright',
             ],
-            
+
             // Location (for prayer times)
             [
                 'key' => 'location_latitude',

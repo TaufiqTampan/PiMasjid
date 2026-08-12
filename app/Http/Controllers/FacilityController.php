@@ -23,7 +23,7 @@ class FacilityController extends Controller
         $facilities = Facility::withCount(['bookings', 'pendingBookings'])
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(fn($f) => [
+            ->map(fn ($f) => [
                 'id' => $f->id,
                 'name' => $f->name,
                 'slug' => $f->slug,
@@ -39,11 +39,11 @@ class FacilityController extends Controller
             ]);
 
         $bookings = FacilityBooking::with('facility', 'approvedBy')
-            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
-            ->when($request->filled('facility_id'), fn($q) => $q->where('facility_id', $request->facility_id))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when($request->filled('facility_id'), fn ($q) => $q->where('facility_id', $request->facility_id))
             ->orderBy('created_at', 'desc')
             ->paginate(20)
-            ->through(fn($b) => [
+            ->through(fn ($b) => [
                 'id' => $b->id,
                 'booking_code' => $b->booking_code,
                 'facility_name' => $b->facility->name ?? '-',
@@ -104,7 +104,7 @@ class FacilityController extends Controller
 
         Facility::create([
             'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']) . '-' . Str::random(4),
+            'slug' => Str::slug($validated['name']).'-'.Str::random(4),
             'facility_type' => $validated['facility_type'],
             'capacity' => $validated['capacity'] ?? null,
             'description' => $validated['description'] ?? null,

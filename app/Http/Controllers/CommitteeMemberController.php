@@ -14,9 +14,9 @@ class CommitteeMemberController extends Controller
         $members = CommitteeMember::orderBy('division')
             ->orderBy('order')
             ->paginate(20);
-            
+
         return Inertia::render('CommitteeMembers/Index', [
-            'members' => $members
+            'members' => $members,
         ]);
     }
 
@@ -64,16 +64,16 @@ class CommitteeMemberController extends Controller
                 if ($committeeMember->cloudinary_public_id) {
                     CloudinaryService::delete($committeeMember->cloudinary_public_id);
                 }
-                
+
                 $result = CloudinaryService::upload($request->file('photo'), 'committee');
                 $validated['photo_path'] = $result['url'];
                 $validated['cloudinary_public_id'] = $result['public_id'];
             } else {
                 // Delete old local photo
-                if ($committeeMember->photo_path && !str_starts_with($committeeMember->photo_path, 'http')) {
+                if ($committeeMember->photo_path && ! str_starts_with($committeeMember->photo_path, 'http')) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($committeeMember->photo_path);
                 }
-                
+
                 $path = $request->file('photo')->store('committee', 'public');
                 $validated['photo_path'] = $path;
                 $validated['cloudinary_public_id'] = null;
@@ -91,7 +91,7 @@ class CommitteeMemberController extends Controller
         if ($committeeMember->cloudinary_public_id) {
             CloudinaryService::delete($committeeMember->cloudinary_public_id);
         }
-        
+
         $committeeMember->delete();
 
         return redirect()->back()->with('success', 'Pengurus berhasil dihapus.');

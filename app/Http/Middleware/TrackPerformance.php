@@ -20,21 +20,21 @@ class TrackPerformance
         // Record start metrics
         $startTime = microtime(true);
         $startMemory = memory_get_usage(true) / 1024 / 1024; // Convert to MB
-        
+
         // Enable query log to count queries
         DB::enableQueryLog();
-        
+
         // Process the request
         $response = $next($request);
-        
+
         // Calculate metrics
         $endTime = microtime(true);
         $endMemory = memory_get_usage(true) / 1024 / 1024;
-        
+
         $responseTime = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
         $memoryUsage = round($endMemory, 2);
         $queryCount = count(DB::getQueryLog());
-        
+
         // Log performance data (only for authenticated requests to reduce noise)
         if (auth()->check()) {
             try {
@@ -52,8 +52,7 @@ class TrackPerformance
                 // In production, you might want to log this to a separate error log
             }
         }
-        
+
         return $response;
     }
 }
-

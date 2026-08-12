@@ -38,12 +38,13 @@ class Post extends Model
     // Accessors
     public function getImageUrlAttribute()
     {
-        if (!$this->image_path) {
+        if (! $this->image_path) {
             return 'https://placehold.co/600x400/e2e8f0/1e293b?text=No+Image';
         }
-        return str_starts_with($this->image_path, 'http') 
-            ? $this->image_path 
-            : asset('storage/' . $this->image_path);
+
+        return str_starts_with($this->image_path, 'http')
+            ? $this->image_path
+            : asset('storage/'.$this->image_path);
     }
 
     public function getAuthorNameAttribute()
@@ -55,7 +56,7 @@ class Post extends Model
     public function setTitleAttribute($value)
     {
         $this->attributes['title'] = $value;
-        $this->attributes['slug'] = Str::slug($value) . '-' . uniqid(); 
+        $this->attributes['slug'] = Str::slug($value).'-'.uniqid();
         // Simple slug generation. For production, unique checking is better, but this suffices for now.
     }
 

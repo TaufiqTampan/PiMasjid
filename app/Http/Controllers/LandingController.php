@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PrayerTime;
 use App\Models\Slide;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -14,27 +13,27 @@ class LandingController extends Controller
     public function index(): Response
     {
         $now = now();
-        
+
         // Prayer Times (Robust)
         $prayerData = $this->getPrayerTimes();
         $nextPrayer = $this->getNextPrayer($prayerData, $now);
-        
+
         // Financial Summary (approved only)
         $totalIncome = Transaction::income()->approved()->sum('amount');
         $totalExpense = Transaction::expense()->approved()->sum('amount');
         $balance = $totalIncome - $totalExpense;
-        
+
         // Active Slides
         $activeSlides = Slide::where('is_active', true)
             ->orderBy('order')
             ->take(5)
             ->get()
-            ->map(fn($slide) => [
+            ->map(fn ($slide) => [
                 'id' => $slide->id,
                 'title' => $slide->title,
                 'image_url' => $slide->image_url,
             ]);
-        
+
         // Committee Members (Grouped)
         $committee = \App\Models\CommitteeMember::where('is_active', true)
             ->whereNotNull('photo_path')
@@ -43,14 +42,14 @@ class LandingController extends Controller
             ->orderBy('order')
             ->get()
             ->groupBy('division')
-            ->map(fn($group) => $group->map(fn($member) => [
+            ->map(fn ($group) => $group->map(fn ($member) => [
                 'id' => $member->id,
                 'name' => $member->name,
                 'position' => $member->position,
                 'division' => $member->division,
                 'photo_url' => $member->photo_url,
             ]));
-        
+
         return Inertia::render('Welcome', [
             'prayerTimes' => $prayerData,
             'nextPrayer' => $nextPrayer,
@@ -58,9 +57,9 @@ class LandingController extends Controller
                 'income' => $totalIncome,
                 'expense' => $totalExpense,
                 'balance' => $balance,
-                'formatted_income' => 'Rp ' . number_format($totalIncome, 0, ',', '.'),
-                'formatted_expense' => 'Rp ' . number_format($totalExpense, 0, ',', '.'),
-                'formatted_balance' => 'Rp ' . number_format($balance, 0, ',', '.'),
+                'formatted_income' => 'Rp '.number_format($totalIncome, 0, ',', '.'),
+                'formatted_expense' => 'Rp '.number_format($totalExpense, 0, ',', '.'),
+                'formatted_balance' => 'Rp '.number_format($balance, 0, ',', '.'),
             ],
             'slides' => $activeSlides,
             'committee' => $committee,
@@ -74,18 +73,18 @@ class LandingController extends Controller
                 ->latest('published_at')
                 ->take(3)
                 ->get()
-                ->map(fn($post) => [
+                ->map(fn ($post) => [
                     'id' => $post->id,
                     'title' => $post->title,
                     'slug' => $post->slug,
-                    'excerpt' => $post->excerpt, 
+                    'excerpt' => $post->excerpt,
                     'image_url' => $post->image_url,
                     'published_at' => $post->published_at->translatedFormat('d F Y'),
                     'author_name' => $post->author->name,
                 ]),
         ]);
     }
-    
+
     private function getPrayerTimes()
     {
         // Try to get from API or Database, fallback to static
@@ -100,13 +99,14 @@ class LandingController extends Controller
 
             if ($response->successful()) {
                 $timings = $response->json('data.timings');
+
                 return [
                     'Subuh' => $timings['Fajr'],
                     'Dzuhur' => $timings['Dhuhr'],
                     'Ashar' => $timings['Asr'],
                     'Maghrib' => $timings['Maghrib'],
                     'Isya' => $timings['Isha'],
-                    'date' => now()->translatedFormat('l, d F Y')
+                    'date' => now()->translatedFormat('l, d F Y'),
                 ];
             }
         } catch (\Exception $e) {
@@ -120,14 +120,16 @@ class LandingController extends Controller
             'Ashar' => '15:20',
             'Maghrib' => '18:10',
             'Isya' => '19:25',
-            'date' => now()->translatedFormat('l, d F Y')
+            'date' => now()->translatedFormat('l, d F Y'),
         ];
     }
 
     private function getNextPrayer($prayerTimes, $now)
     {
-        if (!$prayerTimes) return null; // Should not happen with fallback
-        
+        if (! $prayerTimes) {
+            return null;
+        } // Should not happen with fallback
+
         $prayers = [
             'Subuh' => $prayerTimes['Subuh'],
             'Dzuhur' => $prayerTimes['Dzuhur'],
@@ -135,7 +137,7 @@ class LandingController extends Controller
             'Maghrib' => $prayerTimes['Maghrib'],
             'Isya' => $prayerTimes['Isya'],
         ];
-        
+
         foreach ($prayers as $name => $time) {
             // Need to parse time "HH:mm" to Carbon today
             $prayerDateTime = Carbon::createFromFormat('H:i', $time);
@@ -147,17 +149,18 @@ class LandingController extends Controller
                 ];
             }
         }
-        
+
         // If passed Isya', show tomorrow's Subuh (Generic logic for now, or just null)
         return null;
     }
-    
+
     private function getNextFriday()
     {
         $now = now();
         if ($now->dayOfWeek === Carbon::FRIDAY) {
             return $now->translatedFormat('d F Y');
         }
+
         return $now->next(Carbon::FRIDAY)->translatedFormat('d F Y');
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
-if (!function_exists('calculate_zakat_fitrah')) {
+if (! function_exists('calculate_zakat_fitrah')) {
     /**
      * Calculate Zakat Fitrah amount
      *
-     * @param float $ricePricePerLiter Price of rice per liter
-     * @param int $personCount Number of persons
+     * @param  float  $ricePricePerLiter  Price of rice per liter
+     * @param  int  $personCount  Number of persons
      * @return float Calculated zakat amount
      */
     function calculate_zakat_fitrah(float $ricePricePerLiter, int $personCount = 1): float
@@ -14,13 +14,13 @@ if (!function_exists('calculate_zakat_fitrah')) {
     }
 }
 
-if (!function_exists('calculate_zakat_mal')) {
+if (! function_exists('calculate_zakat_mal')) {
     /**
      * Calculate Zakat Mal (2.5% of wealth if above nisab)
      *
-     * @param float $harta Total wealth
-     * @param float $hutang Total debt
-     * @param float $goldPricePerGram Current gold price per gram
+     * @param  float  $harta  Total wealth
+     * @param  float  $hutang  Total debt
+     * @param  float  $goldPricePerGram  Current gold price per gram
      * @return array ['amount' => float, 'nisab' => float, 'is_above_nisab' => bool]
      */
     function calculate_zakat_mal(float $harta, float $hutang, float $goldPricePerGram): array
@@ -39,11 +39,11 @@ if (!function_exists('calculate_zakat_mal')) {
     }
 }
 
-if (!function_exists('calculate_zakat_profesi')) {
+if (! function_exists('calculate_zakat_profesi')) {
     /**
      * Calculate Zakat Profesi (2.5% of income)
      *
-     * @param float $penghasilan Monthly income
+     * @param  float  $penghasilan  Monthly income
      * @return float Calculated zakat amount
      */
     function calculate_zakat_profesi(float $penghasilan): float
@@ -52,7 +52,7 @@ if (!function_exists('calculate_zakat_profesi')) {
     }
 }
 
-if (!function_exists('get_asnaf_categories')) {
+if (! function_exists('get_asnaf_categories')) {
     /**
      * Get list of 8 Asnaf categories
      *
@@ -73,25 +73,24 @@ if (!function_exists('get_asnaf_categories')) {
     }
 }
 
-if (!function_exists('format_rupiah')) {
+if (! function_exists('format_rupiah')) {
     /**
      * Format amount to Rupiah currency
      *
-     * @param float|int $amount
-     * @return string
+     * @param  float|int  $amount
      */
     function format_rupiah($amount): string
     {
-        return 'Rp ' . number_format($amount, 0, ',', '.');
+        return 'Rp '.number_format($amount, 0, ',', '.');
     }
 }
 
-if (!function_exists('validate_qurban_share')) {
+if (! function_exists('validate_qurban_share')) {
     /**
      * Validate qurban share count based on animal type
      *
-     * @param string $animalType Type of animal
-     * @param int $shareCount Number of shares
+     * @param  string  $animalType  Type of animal
+     * @param  int  $shareCount  Number of shares
      * @return array ['valid' => bool, 'message' => string|null]
      */
     function validate_qurban_share(string $animalType, int $shareCount): array

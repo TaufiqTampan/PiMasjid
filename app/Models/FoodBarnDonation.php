@@ -31,11 +31,12 @@ class FoodBarnDonation extends Model
      */
     public function getProofUrlAttribute($value)
     {
-        if (!$value) {
+        if (! $value) {
             return null;
         }
-        return str_starts_with($value, 'http') 
-            ? $value 
-            : asset('storage/' . $value);
+
+        return str_starts_with($value, 'http')
+            ? $value
+            : asset('storage/'.$value);
     }
 }

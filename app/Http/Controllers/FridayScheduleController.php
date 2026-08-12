@@ -11,8 +11,9 @@ class FridayScheduleController extends Controller
     public function index()
     {
         $schedules = FridaySchedule::latest('date')->paginate(10);
+
         return Inertia::render('FridaySchedules/Index', [
-            'schedules' => $schedules
+            'schedules' => $schedules,
         ]);
     }
 
@@ -36,7 +37,7 @@ class FridayScheduleController extends Controller
     public function update(Request $request, FridaySchedule $fridaySchedule)
     {
         $validated = $request->validate([
-            'date' => 'required|date|unique:friday_schedules,date,' . $fridaySchedule->id,
+            'date' => 'required|date|unique:friday_schedules,date,'.$fridaySchedule->id,
             'time' => 'required',
             'khatib' => 'required|string|max:255',
             'imam' => 'required|string|max:255',

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('proof_image_path')->nullable()->comment('Path to proof image (REQUIRED for expenses)');
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete()->comment('User who verified/recorded this transaction');
             $table->date('date')->comment('Transaction date');
-            
+
             // Approval workflow fields
             $table->enum('status', ['approved', 'pending', 'rejected'])
                 ->default('approved')
@@ -33,9 +33,9 @@ return new class extends Migration
                 ->comment('Approval timestamp');
             $table->text('rejection_reason')->nullable()
                 ->comment('Reason for rejection if status is rejected');
-            
+
             $table->timestamps();
-            
+
             // Indexes for performance
             $table->index(['type', 'date']);
             $table->index('category');

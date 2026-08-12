@@ -1,4 +1,5 @@
 <?php
+
 use App\Models\User;
 
 define('LARAVEL_START', microtime(true));
@@ -15,18 +16,17 @@ try {
     $user = User::where('email', $email)->first();
 
     if ($user) {
-        echo "User found: " . $user->name . "\n";
-        echo "Old Role: " . $user->role . "\n";
-        
+        echo 'User found: '.$user->name."\n";
+        echo 'Old Role: '.$user->role."\n";
+
         $user->role = 'super_admin';
         $user->save();
-        
-        echo "New Role: " . $user->role . "\n";
+
+        echo 'New Role: '.$user->role."\n";
         echo "Role updated successfully!\n";
     } else {
         echo "User not found. Please run the reset script first.\n";
     }
 } catch (\Exception $e) {
-    echo "Error: " . $e->getMessage();
+    echo 'Error: '.$e->getMessage();
 }
-?>

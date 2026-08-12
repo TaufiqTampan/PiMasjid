@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ZakatExport;
+use App\Models\Setting;
 use App\Models\Zakat;
 use App\Models\ZakatDistribution;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\Setting;
-use App\Exports\ZakatExport;
 use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ZakatController extends Controller
 {
@@ -48,9 +48,9 @@ class ZakatController extends Controller
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('muzakki_name', 'like', "%{$search}%")
-                  ->orWhere('muzakki_nik', 'like', "%{$search}%");
+                    ->orWhere('muzakki_nik', 'like', "%{$search}%");
             });
         }
 
@@ -119,51 +119,51 @@ class ZakatController extends Controller
     public function calculate(Request $request)
     {
         $type = $request->input('type');
-        
+
         if ($type === 'fitrah') {
             // Zakat Fitrah: 3.5 liter beras x harga beras per liter x jumlah jiwa
             $pricePerLiter = $request->input('rice_price_per_liter', 15000);
             $personCount = $request->input('person_count', 1);
             $amount = 3.5 * $pricePerLiter * $personCount;
-            
+
             return response()->json([
                 'amount' => $amount,
-                'formula' => '3.5L x Rp ' . number_format($pricePerLiter) . ' x ' . $personCount . ' jiwa',
+                'formula' => '3.5L x Rp '.number_format($pricePerLiter).' x '.$personCount.' jiwa',
                 'rice_kg' => 3.5 * $personCount,
             ]);
         }
-        
+
         if ($type === 'mal') {
             // Zakat Mal: 2.5% dari (harta - hutang) jika >= nisab
             $harta = $request->input('harta', 0);
             $hutang = $request->input('hutang', 0);
             $goldPricePerGram = $request->input('gold_price', 1000000); // Default 1 juta per gram
             $nisab = 85 * $goldPricePerGram; // 85 gram emas
-            
+
             $nettWealth = $harta - $hutang;
             $isAboveNisab = $nettWealth >= $nisab;
             $amount = $isAboveNisab ? $nettWealth * 0.025 : 0;
-            
+
             return response()->json([
                 'amount' => $amount,
                 'nisab' => $nisab,
                 'nett_wealth' => $nettWealth,
                 'is_above_nisab' => $isAboveNisab,
-                'formula' => $isAboveNisab ? '(Rp ' . number_format($harta) . ' - Rp ' . number_format($hutang) . ') x 2.5%' : 'Belum mencapai nisab',
+                'formula' => $isAboveNisab ? '(Rp '.number_format($harta).' - Rp '.number_format($hutang).') x 2.5%' : 'Belum mencapai nisab',
             ]);
         }
-        
+
         if ($type === 'profesi') {
             // Zakat Profesi: 2.5% dari penghasilan bulanan
             $penghasilan = $request->input('penghasilan', 0);
             $amount = $penghasilan * 0.025;
-            
+
             return response()->json([
                 'amount' => $amount,
-                'formula' => 'Rp ' . number_format($penghasilan) . ' x 2.5%',
+                'formula' => 'Rp '.number_format($penghasilan).' x 2.5%',
             ]);
         }
-        
+
         return response()->json(['error' => 'Invalid type'], 400);
     }
 
@@ -173,21 +173,21 @@ class ZakatController extends Controller
     public function distribute(): Response
     {
         $currentYear = Zakat::max('year') ?? now()->year;
-        
+
         // Total collected
         $totalCollected = Zakat::byYear($currentYear)->sum('amount');
         $totalBerasKg = Zakat::byYear($currentYear)->byPaymentType('beras')->sum('rice_kg');
-        
+
         // Total distributed
         $totalDistributed = ZakatDistribution::byYear($currentYear)->sum('amount');
         $totalBerasDistributedKg = ZakatDistribution::byYear($currentYear)->byType('beras')->sum('rice_kg');
-        
+
         // Distribution history
         $distributions = ZakatDistribution::with('distributedBy')
             ->byYear($currentYear)
             ->latest()
             ->paginate(20);
-        
+
         $asnafCategories = [
             'fakir' => 'Fakir (Tidak punya harta/penghasilan)',
             'miskin' => 'Miskin (Penghasilan kurang)',
@@ -198,7 +198,7 @@ class ZakatController extends Controller
             'sabilillah' => 'Sabilillah (Jihad fi sabilillah)',
             'ibnu_sabil' => 'Ibnu Sabil (Musafir)',
         ];
-        
+
         return Inertia::render('Zakat/Distribute', [
             'distributions' => $distributions,
             'asnaf_categories' => $asnafCategories,
@@ -243,21 +243,21 @@ class ZakatController extends Controller
     public function reports(Request $request): Response
     {
         $year = $request->input('year', Zakat::max('year') ?? now()->year);
-        
+
         // Summary by type
         $fitrahTotal = Zakat::fitrah()->byYear($year)->sum('amount');
         $malTotal = Zakat::mal()->byYear($year)->sum('amount');
         $profesiTotal = Zakat::profesi()->byYear($year)->sum('amount');
         $grandTotal = $fitrahTotal + $malTotal + $profesiTotal;
-        
+
         // Distribution by asnaf
         $distributionByAsnaf = ZakatDistribution::byYear($year)
             ->selectRaw('mustahik_category, SUM(amount) as total')
             ->groupBy('mustahik_category')
             ->get();
-        
+
         $totalDistributed = ZakatDistribution::byYear($year)->sum('amount');
-        
+
         return Inertia::render('Zakat/Reports', [
             'year' => $year,
             'summary' => [
@@ -279,25 +279,25 @@ class ZakatController extends Controller
     {
         $year = $request->input('year', now()->year);
         $type = $request->input('type', 'pdf');
-        
+
         $zakats = Zakat::byYear($year)->latest()->get();
-        
+
         // Calculate Summary
         // Note: Logic simplified for specific export needs
         $totalUang = $zakats->where('payment_type', 'uang')->sum('amount');
         $totalBeras = $zakats->where('payment_type', 'beras')->sum('rice_kg');
         $totalMuzakki = $zakats->count();
-        
+
         // Distribution stats
         $distributedUang = ZakatDistribution::byYear($year)->where('type', 'uang')->sum('amount');
         $distributedBeras = ZakatDistribution::byYear($year)->where('type', 'beras')->sum('rice_kg');
-        
+
         // Distribution by asnaf for detailed report
         $distributionByAsnaf = ZakatDistribution::byYear($year)
             ->selectRaw('mustahik_category, SUM(amount) as total_amount, SUM(rice_kg) as total_rice')
             ->groupBy('mustahik_category')
             ->get();
-        
+
         $summary = [
             'total_amount' => $totalUang,
             'total_rice' => $totalBeras,
@@ -323,6 +323,7 @@ class ZakatController extends Controller
         } else {
             $pdf = Pdf::loadView('exports.zakat_pdf', $data);
             $pdf->setPaper('a4', 'portrait');
+
             return $pdf->stream("Laporan_Zakat_$year.pdf");
         }
     }

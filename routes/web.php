@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -71,13 +70,11 @@ Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'inde
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     // User Management (super_admin only)
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])
         ->name('users.index');
@@ -93,12 +90,12 @@ Route::middleware('auth')->group(function () {
     // Global Settings
     Route::get('/settings', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
-    
+
     // Component Showcase
     Route::get('/components-showcase', function () {
         return Inertia::render('ComponentShowcase');
     })->name('components.showcase');
-    
+
     // Transaction Management
     Route::get('/transactions', [App\Http\Controllers\TransactionController::class, 'index'])
         ->name('transactions.index');
@@ -108,7 +105,7 @@ Route::middleware('auth')->group(function () {
         ->name('transactions.store');
     Route::delete('/transactions/{id}', [App\Http\Controllers\TransactionController::class, 'destroy'])
         ->name('transactions.destroy');
-    
+
     // Approval System (Ketua only, enforced by Gates)
     Route::get('/approvals', [App\Http\Controllers\ApprovalController::class, 'index'])
         ->name('approvals.index');
@@ -116,7 +113,7 @@ Route::middleware('auth')->group(function () {
         ->name('approvals.approve');
     Route::post('/approvals/{transaction}/reject', [App\Http\Controllers\ApprovalController::class, 'reject'])
         ->name('approvals.reject');
-    
+
     // Slides Management (Marbot/Super Admin)
     Route::get('/slides', [App\Http\Controllers\SlideController::class, 'index'])
         ->name('slides.index');
@@ -128,7 +125,7 @@ Route::middleware('auth')->group(function () {
         ->name('slides.update');
     Route::delete('/slides/{slide}', [App\Http\Controllers\SlideController::class, 'destroy'])
         ->name('slides.destroy');
-    
+
     // Assets Management (Marbot/Super Admin)
     Route::get('/assets/export', [App\Http\Controllers\AssetController::class, 'export'])
         ->name('assets.export');
@@ -180,7 +177,7 @@ Route::middleware('auth')->group(function () {
     // Lectures Management (Kajian Umum)
     Route::resource('lectures', App\Http\Controllers\LectureController::class)
         ->middleware('can:manage_lectures');
-    
+
     // Zakat Management
     Route::prefix('zakat')->group(function () {
         Route::get('/', [App\Http\Controllers\ZakatController::class, 'index'])->name('zakat.index');
@@ -192,7 +189,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [App\Http\Controllers\ZakatController::class, 'reports'])->name('zakat.reports');
         Route::get('/export', [App\Http\Controllers\ZakatController::class, 'export'])->name('zakat.export'); // New export route
     });
-    
+
     // Qurban Management
     Route::prefix('qurban')->group(function () {
         Route::get('/', [App\Http\Controllers\QurbanController::class, 'index'])->name('qurban.index');

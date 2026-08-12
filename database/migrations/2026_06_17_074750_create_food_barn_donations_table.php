@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('food_barn_donations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('food_barn_program_id')
-                  ->nullable()
-                  ->constrained('food_barn_programs')
-                  ->onDelete('cascade');
+                ->nullable()
+                ->constrained('food_barn_programs')
+                ->onDelete('cascade');
             $table->string('donor_name');
             $table->string('donor_phone');
             $table->string('donation_type'); // uang, barang

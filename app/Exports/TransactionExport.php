@@ -4,15 +4,16 @@ namespace App\Exports;
 
 use App\Models\Transaction;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TransactionExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class TransactionExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
     protected $startDate;
+
     protected $endDate;
 
     public function __construct($startDate, $endDate)

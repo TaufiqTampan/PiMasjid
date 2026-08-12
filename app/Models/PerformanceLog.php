@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class PerformanceLog extends Model
 {
@@ -69,27 +69,30 @@ class PerformanceLog extends Model
     /**
      * Get average response time for the given query.
      */
-    public static function averageResponseTime(Builder $query = null): float
+    public static function averageResponseTime(?Builder $query = null): float
     {
         $query = $query ?? static::query();
+
         return round($query->avg('response_time_ms'), 2);
     }
 
     /**
      * Get average memory usage for the given query.
      */
-    public static function averageMemoryUsage(Builder $query = null): float
+    public static function averageMemoryUsage(?Builder $query = null): float
     {
         $query = $query ?? static::query();
+
         return round($query->avg('memory_usage_mb'), 2);
     }
 
     /**
      * Get average query count for the given query.
      */
-    public static function averageQueryCount(Builder $query = null): float
+    public static function averageQueryCount(?Builder $query = null): float
     {
         $query = $query ?? static::query();
+
         return round($query->avg('query_count'), 2);
     }
 }

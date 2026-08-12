@@ -37,4 +37,3 @@ class StoreZakatRequest extends FormRequest
         ];
     }
 }
-

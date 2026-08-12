@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('food_barn_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('food_barn_program_id')
-                  ->constrained('food_barn_programs')
-                  ->onDelete('cascade');
+                ->constrained('food_barn_programs')
+                ->onDelete('cascade');
             $table->string('name');
             $table->string('phone');
             $table->text('address');

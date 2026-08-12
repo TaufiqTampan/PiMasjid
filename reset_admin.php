@@ -1,4 +1,5 @@
 <?php
+
 // Load Laravel's autoload and app
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ try {
     $user = User::where('email', $email)->first();
 
     if ($user) {
-        echo "User found: " . $user->name . " (Role: " . $user->role . ")\n";
+        echo 'User found: '.$user->name.' (Role: '.$user->role.")\n";
         echo "Resetting password to 'admin123'...\n";
         $user->password = Hash::make($password);
         $user->save();
@@ -36,6 +37,5 @@ try {
         echo "Super Admin created successfully!\n";
     }
 } catch (\Exception $e) {
-    echo "Error: " . $e->getMessage();
+    echo 'Error: '.$e->getMessage();
 }
-?>

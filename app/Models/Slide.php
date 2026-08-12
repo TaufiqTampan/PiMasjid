@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Slide extends Model
 {
@@ -41,8 +41,8 @@ class Slide extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->image_path 
-                ? (str_starts_with($this->image_path, 'http') ? $this->image_path : asset('storage/' . $this->image_path))
+            get: fn () => $this->image_path
+                ? (str_starts_with($this->image_path, 'http') ? $this->image_path : asset('storage/'.$this->image_path))
                 : null,
         );
     }
