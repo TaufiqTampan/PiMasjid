@@ -51,6 +51,7 @@ const navigationItems = [
         name: 'Layanan',
         type: 'dropdown',
         items: [
+            { name: '🌙 Kalender Ramadhan & Imsakiyah', href: '/ramadhan' },
             { name: 'Galeri Kegiatan', href: '/galeri' },
             { name: 'Jadwal Sholat', href: '/ibadah/jadwal' },
             { name: 'Agenda', href: '/ibadah/agenda' },

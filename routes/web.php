@@ -33,6 +33,12 @@ Route::get('/quran/{nomor}', function ($nomor) {
     return inertia('Public/QuranShow', ['nomor' => $nomor]);
 })->name('public.quran.show');
 
+// Public Kalender Ramadhan & Jadwal Imsakiyah
+Route::get('/ramadhan', [App\Http\Controllers\RamadhanController::class, 'index'])
+    ->name('public.ramadhan');
+Route::get('/ramadhan/pdf', [App\Http\Controllers\RamadhanController::class, 'exportPdf'])
+    ->name('public.ramadhan.pdf');
+
 // Public Zakat & Qurban Info Pages (tanpa auth)
 Route::get('/info/zakat', function () {
     return inertia('Public/Zakat');
