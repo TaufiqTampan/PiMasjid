@@ -198,8 +198,16 @@ const triggerIqamah = (prayerName = 'Dzuhur') => {
     playChime('beep');
 };
 
-const triggerStandby = () => {
-    standbySecondsRemaining.value = (props.displaySettings?.sholat_duration || 15) * 60;
+const blackoutStyle = ref(props.displaySettings?.sholat_mode_style || 'blackout');
+
+const triggerStandby = (secondsOverride = null, styleOverride = null) => {
+    const duration = secondsOverride !== null ? secondsOverride : (props.displaySettings?.sholat_duration || 15) * 60;
+    standbySecondsRemaining.value = duration;
+    if (styleOverride) {
+        blackoutStyle.value = styleOverride;
+    } else {
+        blackoutStyle.value = props.displaySettings?.sholat_mode_style || 'blackout';
+    }
     displayMode.value = 'PRAYER_STANDBY';
 };
 
@@ -417,21 +425,71 @@ const isNextPrayer = (prayerName) => {
         <!-- ------------------------------------------------------------- -->
         <!-- STATE 3: PRAYER STANDBY SCREEN (SHOLAT MODE)                  -->
         <!-- ------------------------------------------------------------- -->
+        <!-- ------------------------------------------------------------- -->
+        <!-- STATE 3: PRAYER STANDBY SCREEN (SHOLAT MODE / BLACKOUT)       -->
+        <!-- ------------------------------------------------------------- -->
         <Transition name="fade">
-            <div v-if="displayMode === 'PRAYER_STANDBY'" style="background-color: #000000;" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center">
-                <div class="space-y-6 max-w-3xl">
-                    <div class="text-7xl opacity-80 animate-pulse">📵</div>
-                    <h1 style="color: #ffffff;" class="text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase">
-                        LURUSKAN & RAPATKAN SHAF
-                    </h1>
-                    <p style="color: #cbd5e1;" class="text-xl md:text-2xl font-light">
-                        Mohon heningkan HP demi menjaga kekhusyukan ibadah sholat
+            <div v-if="displayMode === 'PRAYER_STANDBY'" style="background-color: #000000;" class="fixed inset-0 z-50 flex flex-col items-center justify-between p-8 text-center select-none">
+                
+                <!-- Top Status Bar (Ultra Minimal / Dim) -->
+                <div class="w-full flex justify-between items-center opacity-60">
+                    <span style="color: #475569;" class="text-xs font-mono tracking-widest uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        MODE SHOLAT BERLANGSUNG
+                    </span>
+                    <span style="color: #475569;" class="text-xs font-mono font-bold">
+                        {{ formattedTime }}
+                    </span>
+                </div>
+
+                <!-- Center Content: Pitch Blackout vs Shaf Reminder Mode -->
+                <div v-if="blackoutStyle === 'blackout'" class="my-auto space-y-6 max-w-2xl opacity-40 hover:opacity-100 transition-opacity duration-500">
+                    <div class="text-6xl animate-pulse">🌙</div>
+                    <h2 style="color: #64748b;" class="text-2xl md:text-3xl font-extrabold uppercase tracking-widest">
+                        LAYAR DIMMED / SHOLAT BERLANGSUNG
+                    </h2>
+                    <p style="color: #475569;" class="text-sm font-medium">
+                        Layar sengaja digelapkan agar tidak mengganggu kekhusyukan jamaah sholat
                     </p>
-                    <div style="color: #64748b;" class="font-mono text-sm pt-6">
+                    <div style="color: #334155;" class="font-mono text-sm font-bold tracking-wider pt-2">
                         Layar kembali aktif dalam {{ formatCountdown(standbySecondsRemaining) }}
                     </div>
-                    <button @click="resetToNormal" style="background-color: #111827; border-color: #374151; color: #94a3b8;" class="mt-4 px-6 py-2 rounded-full border text-xs cursor-pointer">
-                        Kembali ke Tampilan Utama
+                </div>
+
+                <div v-else class="my-auto space-y-6 max-w-3xl">
+                    <div class="text-7xl md:text-8xl text-emerald-400 animate-pulse drop-shadow-2xl">📵</div>
+                    <div style="background-color: rgba(16, 185, 129, 0.15); border-color: #059669; color: #34d399;" class="inline-block px-6 py-2 rounded-full border text-xs font-black uppercase tracking-widest">
+                        SHOLAT BERJAMAAH BERLANGSUNG
+                    </div>
+                    <h1 style="color: #ffffff;" class="text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase">
+                        {{ displaySettings?.sholat_mode_message || 'LURUSKAN & RAPATKAN SHAF' }}
+                    </h1>
+                    <p style="color: #cbd5e1;" class="text-xl md:text-2xl font-light">
+                        Mohon heningkan / matikan HP demi menjaga kekhusyukan ibadah sholat
+                    </p>
+                    <div class="pt-4">
+                        <div style="color: #fbbf24;" class="text-5xl md:text-6xl font-mono font-black tracking-tight">
+                            {{ formatCountdown(standbySecondsRemaining) }}
+                        </div>
+                        <span style="color: #64748b;" class="text-xs font-bold uppercase tracking-widest mt-2 block">Sisa Waktu Layar Standby</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Controls Bar (Toggle Style or Exit) -->
+                <div class="w-full flex items-center justify-center gap-3 pt-4">
+                    <button 
+                        @click="blackoutStyle = blackoutStyle === 'blackout' ? 'shaf' : 'blackout'" 
+                        style="background-color: rgba(255, 255, 255, 0.05); border: 1px solid #334155; color: #94a3b8;" 
+                        class="px-5 py-2 rounded-full text-xs font-bold hover:text-white transition cursor-pointer"
+                    >
+                        {{ blackoutStyle === 'blackout' ? '📱 Ganti ke Mode Teks Shaf' : '🌙 Ganti ke Mode Gelap Total (Blackout)' }}
+                    </button>
+                    <button 
+                        @click="resetToNormal" 
+                        style="background-color: #1f2937; border: 1px solid #374151; color: #d1d5db;" 
+                        class="px-5 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition cursor-pointer"
+                    >
+                        ✕ Akhiri Mode Sholat
                     </button>
                 </div>
             </div>
@@ -771,9 +829,19 @@ const isNextPrayer = (prayerName) => {
                         <span>▶</span>
                     </button>
 
-                    <button @click="triggerStandby" style="background-color: rgba(244, 63, 94, 0.2); border: 1px solid #e11d48; color: #fecdd3;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
-                        <span>📱 Tes Standby Sholat</span>
+                    <button @click="triggerStandby(null, 'blackout')" style="background-color: rgba(15, 23, 42, 0.9); border: 1px solid #334155; color: #e2e8f0;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
+                        <span>🌙 Tes Mode Blackout (Pitch Black)</span>
                         <span>▶</span>
+                    </button>
+
+                    <button @click="triggerStandby(null, 'shaf')" style="background-color: rgba(244, 63, 94, 0.2); border: 1px solid #e11d48; color: #fecdd3;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
+                        <span>📵 Tes Mode Teks Shaf (Pengingat)</span>
+                        <span>▶</span>
+                    </button>
+
+                    <button @click="triggerStandby(10, 'blackout')" style="background-color: rgba(139, 92, 246, 0.2); border: 1px solid #7c3aed; color: #ddd6fe;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">
+                        <span>⚡ Tes Quick Blackout (10 Detik)</span>
+                        <span>⚡</span>
                     </button>
 
                     <button @click="resetToNormal" style="background-color: #1e293b; color: #cbd5e1; border: 1px solid #334155;" class="w-full text-left px-3 py-2 rounded-xl font-bold flex justify-between items-center cursor-pointer">

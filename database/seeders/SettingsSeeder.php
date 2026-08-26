@@ -221,6 +221,27 @@ class SettingsSeeder extends Seeder
                 'group' => 'display',
                 'label' => 'Jeda Iqamah Isya (Menit)',
             ],
+            [
+                'key' => 'sholat_duration',
+                'value' => '15',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Durasi Mode Sholat / Layar Blackout (Menit)',
+            ],
+            [
+                'key' => 'sholat_mode_style',
+                'value' => 'blackout',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Tipe Layar Mode Sholat (blackout = Gelap Total, shaf = Teks Rapatkan Shaf)',
+            ],
+            [
+                'key' => 'sholat_mode_message',
+                'value' => 'LURUSKAN & RAPATKAN SHAF',
+                'type' => 'text',
+                'group' => 'display',
+                'label' => 'Pesan Pengingat Mode Sholat',
+            ],
         ];
 
         foreach ($settings as $setting) {

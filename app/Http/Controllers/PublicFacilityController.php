@@ -61,13 +61,24 @@ class PublicFacilityController extends Controller
                 ->withInput();
         }
 
-        FacilityBooking::create([
+        $booking = FacilityBooking::create([
             ...$validated,
             'booking_code' => FacilityBooking::generateBookingCode(),
             'status' => 'pending',
         ]);
 
-        return redirect()->back()->with('success', 'Permohonan peminjaman berhasil dikirim! Kami akan menghubungi Anda untuk konfirmasi. Kode booking akan dikirimkan melalui WhatsApp.');
+        return redirect()->back()
+            ->with('success', 'Permohonan peminjaman berhasil dikirim! Kode booking Anda adalah '.$booking->booking_code)
+            ->with('booking', [
+                'id' => $booking->id,
+                'booking_code' => $booking->booking_code,
+                'borrower_name' => $booking->borrower_name,
+                'borrower_phone' => $booking->borrower_phone,
+                'event_name' => $booking->event_name,
+                'facility_name' => $facility->name,
+                'start_time' => $booking->start_time?->format('d M Y H:i'),
+                'end_time' => $booking->end_time?->format('d M Y H:i'),
+            ]);
     }
 
     /**

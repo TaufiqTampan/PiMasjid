@@ -247,7 +247,17 @@ const handleImageUpload = (event, key) => {
                                                 </div>
 
                                                 <!-- Text Input -->
-                                                <div v-if="setting.type === 'text'">
+                                                <div v-if="setting.key === 'sholat_mode_style'">
+                                                    <select
+                                                        v-model="form.settings.find(s => s.key === setting.key).value"
+                                                        :id="setting.key"
+                                                        class="block w-full rounded-md border-0 py-2 px-3 text-slate-900 dark:text-white shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 bg-white dark:bg-slate-900"
+                                                    >
+                                                        <option value="blackout">🌙 Gelap Total (Blackout / Layar Dimmed)</option>
+                                                        <option value="shaf">📱 Teks Rapatkan Shaf & Matikan HP</option>
+                                                    </select>
+                                                </div>
+                                                <div v-else-if="setting.type === 'text'">
                                                     <input
                                                         v-model="form.settings.find(s => s.key === setting.key).value"
                                                         :id="setting.key"

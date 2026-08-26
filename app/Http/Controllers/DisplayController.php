@@ -128,6 +128,8 @@ class DisplayController extends Controller
                 'iqamah_isha' => (int) setting('iqamah_duration_isha', 10),
                 'adhan_duration' => (int) setting('adhan_duration', 3),
                 'sholat_duration' => (int) setting('sholat_duration', 15),
+                'sholat_mode_style' => setting('sholat_mode_style', 'blackout'),
+                'sholat_mode_message' => setting('sholat_mode_message', 'LURUSKAN & RAPATKAN SHAF'),
                 'site_name' => setting('site_name', 'MasjidVision'),
                 'site_address' => setting('address', 'Jl. Masjid Raya'),
             ],
