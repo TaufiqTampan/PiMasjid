@@ -24,10 +24,22 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
+        if ($this->filled('phone')) {
+            return [
+                'phone' => ['required', 'string'],
+                'password' => ['required', 'string'],
+            ];
+        }
+
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -41,7 +53,21 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = [];
+        if ($this->filled('phone')) {
+            $normalizedPhone = \App\Http\Controllers\Auth\RegisteredUserController::normalizePhone($this->input('phone'));
+            $credentials = ['phone' => $normalizedPhone, 'password' => $this->input('password')];
+        } else {
+            $loginInput = $this->input('email');
+            if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+                $credentials = ['email' => $loginInput, 'password' => $this->input('password')];
+            } else {
+                $normalizedPhone = \App\Http\Controllers\Auth\RegisteredUserController::normalizePhone($loginInput);
+                $credentials = ['phone' => $normalizedPhone, 'password' => $this->input('password')];
+            }
+        }
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -80,6 +106,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->input('email', $this->input('phone'))).'|'.$this->ip());
     }
 }

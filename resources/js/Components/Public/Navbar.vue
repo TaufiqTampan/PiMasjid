@@ -174,13 +174,66 @@ defineExpose({ openDonationModal: () => showDonationModal.value = true });
                         <span class="relative">Dana Masjid</span>
                     </button>
 
-                    <Link 
-                        href="/login" 
-                        class="btn btn-square btn-ghost btn-sm rounded-xl ml-1"
-                        :class="(isScrolled || !transparentOnTop) ? 'text-slate-400 hover:text-emerald-600' : 'text-white/60 hover:text-white'"
-                    >
-                        <UsersIcon class="w-5 h-5" />
-                    </Link>
+                    <!-- Jamaah Auth Menu -->
+                    <template v-if="$page.props.auth?.user">
+                        <Menu as="div" class="relative ml-2">
+                            <MenuButton class="flex items-center gap-2 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                                    {{ $page.props.auth.user.name?.charAt(0).toUpperCase() || 'J' }}
+                                </div>
+                                <span :class="(isScrolled || !transparentOnTop) ? 'text-slate-800 dark:text-slate-200' : 'text-white'" class="hidden xl:inline text-xs font-bold">
+                                    {{ $page.props.auth.user.name }}
+                                </span>
+                            </MenuButton>
+
+                            <transition
+                                enter-active-class="transition duration-100 ease-out"
+                                enter-from-class="transform scale-95 opacity-0"
+                                enter-to-class="transform scale-100 opacity-100"
+                                leave-active-class="transition duration-75 ease-in"
+                                leave-from-class="transform scale-100 opacity-100"
+                                leave-to-class="transform scale-95 opacity-0"
+                            >
+                                <MenuItems class="absolute right-0 mt-3 w-48 origin-top-right rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-slate-200 dark:ring-slate-800 focus:outline-none py-2 border-t-4 border-emerald-500">
+                                    <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ $page.props.auth.user.name }}</p>
+                                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider">{{ $page.props.auth.user.role === 'user' ? 'Jamaah' : $page.props.auth.user.role }}</p>
+                                    </div>
+
+                                    <MenuItem v-if="['super_admin', 'admin', 'ketua', 'bendahara', 'marbot', 'sekretaris'].includes($page.props.auth.user.role)" v-slot="{ active }">
+                                        <Link href="/dashboard" :class="[active ? 'bg-emerald-50 dark:bg-slate-800 text-emerald-600' : 'text-slate-700 dark:text-slate-300', 'block px-4 py-2 text-xs font-bold']">
+                                            📊 Dashboard Pengelola
+                                        </Link>
+                                    </MenuItem>
+
+                                    <MenuItem v-slot="{ active }">
+                                        <Link href="/profile" :class="[active ? 'bg-emerald-50 dark:bg-slate-800 text-emerald-600' : 'text-slate-700 dark:text-slate-300', 'block px-4 py-2 text-xs font-bold']">
+                                            👤 Profil Saya
+                                        </Link>
+                                    </MenuItem>
+
+                                    <MenuItem v-slot="{ active }">
+                                        <Link href="/logout" method="post" as="button" class="w-full text-left" :class="[active ? 'bg-red-50 text-red-600' : 'text-slate-700 dark:text-slate-300', 'block px-4 py-2 text-xs font-bold']">
+                                            🚪 Keluar (Logout)
+                                        </Link>
+                                    </MenuItem>
+                                </MenuItems>
+                            </transition>
+                        </Menu>
+                    </template>
+
+                    <template v-else>
+                        <Link 
+                            href="/login" 
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ml-1 border"
+                            :class="(isScrolled || !transparentOnTop) 
+                                ? 'border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white' 
+                                : 'border-white/60 text-white hover:bg-white hover:text-emerald-700'"
+                        >
+                            <UsersIcon class="w-4 h-4" />
+                            <span>Login Jamaah</span>
+                        </Link>
+                    </template>
                 </div>
 
                 <button

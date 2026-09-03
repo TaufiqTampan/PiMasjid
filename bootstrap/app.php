@@ -18,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrackPerformance::class,
         ]);
 
-        //
+        $middleware->alias([
+            'honeypot' => \App\Http\Middleware\Honeypot::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -13,10 +13,16 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(): Response|\Illuminate\Http\RedirectResponse
     {
         $user = auth()->user();
         $role = $user->role;
+
+        // Non-pengelola users should not access internal management dashboard
+        if (! in_array($role, ['super_admin', 'admin', 'ketua', 'bendahara', 'sekretaris', 'marbot'], true)) {
+            return redirect('/');
+        }
+
         $dashboardType = $this->getDashboardType($role);
 
         $stats = $this->getStatsByRole($role);

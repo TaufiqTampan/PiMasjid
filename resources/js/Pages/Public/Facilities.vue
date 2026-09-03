@@ -25,6 +25,7 @@ const props = defineProps({
 });
 
 const page = usePage();
+const isAuthenticated = computed(() => !!page.props.auth?.user);
 
 // Category filter
 const selectedCategory = ref('all');
@@ -36,6 +37,8 @@ const filteredFacilities = computed(() => {
 // Modal Booking
 const showBookingModal = ref(false);
 const showSuccessModal = ref(false);
+const showLoginModal = ref(false);
+const loginTargetUrl = ref('/fasilitas');
 const successBookingData = ref(null);
 const selectedFacility = ref(null);
 
@@ -51,9 +54,17 @@ const bookingForm = useForm({
 });
 
 const openBookingModal = (facility) => {
+    if (!isAuthenticated.value) {
+        loginTargetUrl.value = '/fasilitas';
+        showLoginModal.value = true;
+        return;
+    }
+
     selectedFacility.value = facility;
     bookingForm.reset();
     bookingForm.facility_id = facility.id;
+    bookingForm.borrower_name = page.props.auth?.user?.name || '';
+    bookingForm.borrower_phone = page.props.auth?.user?.phone || '';
     showBookingModal.value = true;
 };
 
@@ -528,5 +539,12 @@ const getStatusBadge = (status) => {
                 </div>
             </div>
         </div>
+
+        <!-- Login Required Modal -->
+        <LoginRequiredModal
+            :show="showLoginModal"
+            :targetUrl="loginTargetUrl"
+            @close="showLoginModal = false"
+        />
     </PublicLayout>
 </template>

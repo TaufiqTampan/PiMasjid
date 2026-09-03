@@ -1,17 +1,31 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import LoginRequiredModal from '@/Components/Public/LoginRequiredModal.vue';
+
+const page = usePage();
+const isAuthenticated = computed(() => !!page.props.auth?.user);
+const showLoginModal = ref(false);
+const loginTargetUrl = ref('/info/qurban');
 
 const form = useForm({
-    participant_name: '',
-    participant_phone: '',
+    participant_name: page.props.auth?.user?.name || '',
+    participant_phone: page.props.auth?.user?.phone || '',
     participant_address: '',
     animal_type: 'kambing',
     is_shared: false,
     notes: '',
+    website_hp: '',
+    hp_time: Math.floor(Date.now() / 1000),
 });
 
 const submit = () => {
+    if (!isAuthenticated.value) {
+        showLoginModal.value = true;
+        return;
+    }
+
     form.post(route('public.qurban.register'), {
         onSuccess: () => {
             form.reset();
@@ -56,6 +70,11 @@ const submit = () => {
                     <h3 class="text-2xl font-bold text-slate-900 mb-6">Form Pendaftaran</h3>
                     
                     <form @submit.prevent="submit" class="space-y-6">
+                        <!-- Honeypot anti-spam hidden inputs -->
+                        <div style="display: none !important;" aria-hidden="true">
+                            <input type="text" name="website_hp" v-model="form.website_hp" tabindex="-1" autocomplete="off" />
+                            <input type="hidden" name="hp_time" v-model="form.hp_time" />
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap *</label>
                             <input v-model="form.participant_name" type="text" required
@@ -182,5 +201,12 @@ const submit = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Login Required Modal -->
+        <LoginRequiredModal
+            :show="showLoginModal"
+            :targetUrl="loginTargetUrl"
+            @close="showLoginModal = false"
+        />
     </PublicLayout>
 </template>

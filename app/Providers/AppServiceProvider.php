@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +24,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Configure Custom Rate Limiters for Anti-Spam
+        RateLimiter::for('public-browsing', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
+        RateLimiter::for('public-forms', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
 
         // Register Transaction Observer
         \App\Models\Transaction::observe(\App\Observers\TransactionObserver::class);

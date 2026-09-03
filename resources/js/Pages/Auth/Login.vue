@@ -24,6 +24,8 @@ const form = useForm({
     email: '',
     password: '',
     remember: false,
+    website_hp: '',
+    hp_time: Math.floor(Date.now() / 1000),
 });
 
 const submit = () => {
@@ -49,21 +51,26 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">
+            <!-- Honeypot anti-spam hidden inputs -->
+            <div style="display: none !important;" aria-hidden="true">
+                <input type="text" name="website_hp" v-model="form.website_hp" tabindex="-1" autocomplete="off" />
+                <input type="hidden" name="hp_time" v-model="form.hp_time" />
+            </div>
             <div>
-                <InputLabel for="email" value="Email" class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1.5 ml-1" />
+                <InputLabel for="email" value="Email atau Nomor Telepon" class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400 mb-1.5 ml-1" />
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary-500 transition-colors">
                         <EnvelopeIcon class="h-5 w-5" />
                     </div>
                     <TextInput
                         id="email"
-                        type="email"
+                        type="text"
                         class="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900/30 rounded-2xl transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 shadow-sm"
                         v-model="form.email"
                         required
                         autofocus
                         autocomplete="username"
-                        placeholder="Masukkan alamat email"
+                        placeholder="Masukkan email atau no. WhatsApp (08xxx)"
                     />
                 </div>
                 <InputError class="mt-2 ml-1" :message="form.errors.email" />

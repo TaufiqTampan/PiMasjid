@@ -16,8 +16,20 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): Response
+    /**
+     * Display the login view.
+     */
+    public function create(Request $request): Response
     {
+        if ($request->filled('intended')) {
+            $intended = $request->query('intended');
+            if (str_starts_with($intended, '/') && ! str_starts_with($intended, '//')) {
+                session(['url.intended' => url($intended)]);
+            } elseif (filter_var($intended, FILTER_VALIDATE_URL) && parse_url($intended, PHP_URL_HOST) === $request->getHost()) {
+                session(['url.intended' => $intended]);
+            }
+        }
+
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
@@ -33,7 +45,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+        if (in_array($user->role, ['super_admin', 'admin', 'ketua', 'bendahara', 'marbot', 'sekretaris'], true)) {
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        return redirect()->intended('/');
     }
 
     /**

@@ -10,73 +10,80 @@ Route::get('/', [App\Http\Controllers\LandingController::class, 'index'])->name(
 Route::get('/display', [App\Http\Controllers\DisplayController::class, 'index'])
     ->name('display.index');
 
-// Public Pages
-Route::get('/profil/struktur', [App\Http\Controllers\PublicController::class, 'structure'])->name('public.struktur');
-Route::get('/profil/tentang', [App\Http\Controllers\PublicController::class, 'tentang'])->name('public.tentang');
-Route::get('/transparansi/keuangan', [App\Http\Controllers\PublicController::class, 'keuangan'])->name('public.keuangan');
-Route::get('/transparansi/aset', [App\Http\Controllers\PublicController::class, 'aset'])->name('public.aset');
-Route::get('/ibadah/jumat', [App\Http\Controllers\PublicController::class, 'jumat'])->name('public.jumat');
-Route::get('/ibadah/jadwal', [App\Http\Controllers\PublicController::class, 'jadwal'])->name('public.jadwal');
-Route::get('/ibadah/agenda', [App\Http\Controllers\PublicController::class, 'agenda'])->name('public.agenda');
-Route::get('/ibadah/kiblat', [App\Http\Controllers\PublicController::class, 'kiblat'])->name('public.kiblat');
-Route::get('/galeri', [App\Http\Controllers\PublicController::class, 'galeri'])->name('public.galeri');
-Route::get('/berita', [App\Http\Controllers\PublicController::class, 'berita'])->name('public.berita');
-Route::get('/berita/{post:slug}', [App\Http\Controllers\PublicController::class, 'post'])->name('public.post');
-Route::get('/tarbiyah', [App\Http\Controllers\PublicController::class, 'tarbiyah'])->name('public.tarbiyah');
-
-// Public Al-Quran
-Route::get('/quran', function () {
-    return inertia('Public/QuranIndex');
-})->name('public.quran');
-
-Route::get('/quran/{nomor}', function ($nomor) {
-    return inertia('Public/QuranShow', ['nomor' => $nomor]);
-})->name('public.quran.show');
-
-// Public Kalender Ramadhan & Jadwal Imsakiyah
-Route::get('/ramadhan', [App\Http\Controllers\RamadhanController::class, 'index'])
-    ->name('public.ramadhan');
-Route::get('/ramadhan/pdf', [App\Http\Controllers\RamadhanController::class, 'exportPdf'])
-    ->name('public.ramadhan.pdf');
-
-// Public Zakat & Qurban Info Pages (tanpa auth)
-Route::get('/info/zakat', function () {
-    return inertia('Public/Zakat');
-})->name('public.zakat');
-
-Route::get('/info/qurban', function () {
-    return inertia('Public/Qurban');
-})->name('public.qurban');
-
-// Public Qurban Registration Submission
-Route::post('/info/qurban/register', [App\Http\Controllers\QurbanController::class, 'publicRegister'])
-    ->name('public.qurban.register');
-
-// Public Financial Transparency
-Route::get('/keuangan', [App\Http\Controllers\TransactionController::class, 'publicIndex'])
-    ->name('keuangan.index');
-
-// Public Lumbung Pangan
-Route::get('/lumbung-pangan', [App\Http\Controllers\FoodBarnController::class, 'publicIndex'])
-    ->name('public.lumbung-pangan');
-Route::post('/lumbung-pangan/donate', [App\Http\Controllers\FoodBarnController::class, 'publicDonate'])
-    ->name('public.lumbung-pangan.donate');
-Route::post('/lumbung-pangan/request', [App\Http\Controllers\FoodBarnController::class, 'publicRequest'])
-    ->name('public.lumbung-pangan.request');
-
-// Public Facilities & Booking
-Route::get('/fasilitas', [App\Http\Controllers\PublicFacilityController::class, 'index'])
-    ->name('public.facilities');
-Route::post('/fasilitas/booking', [App\Http\Controllers\PublicFacilityController::class, 'store'])
-    ->name('public.facilities.book');
-Route::get('/fasilitas/cek-status', [App\Http\Controllers\PublicFacilityController::class, 'checkStatus'])
-    ->name('public.facilities.check-status');
-
-Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
+// Protected Public Features & Internal Routes (Requires Auth)
 Route::middleware('auth')->group(function () {
+    // Public Pages & Info
+    Route::get('/profil/struktur', [App\Http\Controllers\PublicController::class, 'structure'])->name('public.struktur');
+    Route::get('/profil/tentang', [App\Http\Controllers\PublicController::class, 'tentang'])->name('public.tentang');
+    Route::get('/transparansi/keuangan', [App\Http\Controllers\PublicController::class, 'keuangan'])->name('public.keuangan');
+    Route::get('/transparansi/aset', [App\Http\Controllers\PublicController::class, 'aset'])->name('public.aset');
+    Route::get('/ibadah/jumat', [App\Http\Controllers\PublicController::class, 'jumat'])->name('public.jumat');
+    Route::get('/ibadah/jadwal', [App\Http\Controllers\PublicController::class, 'jadwal'])->name('public.jadwal');
+    Route::get('/ibadah/agenda', [App\Http\Controllers\PublicController::class, 'agenda'])->name('public.agenda');
+    Route::get('/ibadah/kiblat', [App\Http\Controllers\PublicController::class, 'kiblat'])->name('public.kiblat');
+    Route::get('/galeri', [App\Http\Controllers\PublicController::class, 'galeri'])->name('public.galeri');
+    Route::get('/berita', [App\Http\Controllers\PublicController::class, 'berita'])->name('public.berita');
+    Route::get('/berita/{post:slug}', [App\Http\Controllers\PublicController::class, 'post'])->name('public.post');
+    Route::get('/tarbiyah', [App\Http\Controllers\PublicController::class, 'tarbiyah'])->name('public.tarbiyah');
+
+    // Public Al-Quran
+    Route::get('/quran', function () {
+        return inertia('Public/QuranIndex');
+    })->name('public.quran');
+
+    Route::get('/quran/{nomor}', function ($nomor) {
+        return inertia('Public/QuranShow', ['nomor' => $nomor]);
+    })->name('public.quran.show');
+
+    // Public Kalender Ramadhan & Jadwal Imsakiyah
+    Route::get('/ramadhan', [App\Http\Controllers\RamadhanController::class, 'index'])
+        ->name('public.ramadhan');
+    Route::get('/ramadhan/pdf', [App\Http\Controllers\RamadhanController::class, 'exportPdf'])
+        ->name('public.ramadhan.pdf');
+
+    // Public Zakat & Qurban Info Pages
+    Route::get('/info/zakat', function () {
+        return inertia('Public/Zakat');
+    })->name('public.zakat');
+
+    Route::get('/info/qurban', function () {
+        return inertia('Public/Qurban');
+    })->name('public.qurban');
+
+    Route::post('/info/qurban/register', [App\Http\Controllers\QurbanController::class, 'publicRegister'])
+        ->middleware(['throttle:public-forms', 'honeypot'])
+        ->name('public.qurban.register');
+
+    // Financial Transparency
+    Route::get('/keuangan', [App\Http\Controllers\TransactionController::class, 'publicIndex'])
+        ->name('keuangan.index');
+
+    // Lumbung Pangan
+    Route::get('/lumbung-pangan', [App\Http\Controllers\FoodBarnController::class, 'publicIndex'])
+        ->name('public.lumbung-pangan');
+
+    Route::post('/lumbung-pangan/donate', [App\Http\Controllers\FoodBarnController::class, 'publicDonate'])
+        ->middleware(['throttle:public-forms', 'honeypot'])
+        ->name('public.lumbung-pangan.donate');
+
+    Route::post('/lumbung-pangan/request', [App\Http\Controllers\FoodBarnController::class, 'publicRequest'])
+        ->middleware(['throttle:public-forms', 'honeypot'])
+        ->name('public.lumbung-pangan.request');
+
+    // Facilities & Booking
+    Route::get('/fasilitas', [App\Http\Controllers\PublicFacilityController::class, 'index'])
+        ->name('public.facilities');
+
+    Route::post('/fasilitas/booking', [App\Http\Controllers\PublicFacilityController::class, 'store'])
+        ->middleware(['throttle:public-forms', 'honeypot'])
+        ->name('public.facilities.book');
+
+    Route::get('/fasilitas/cek-status', [App\Http\Controllers\PublicFacilityController::class, 'checkStatus'])
+        ->name('public.facilities.check-status');
+
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+        ->middleware('verified')
+        ->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

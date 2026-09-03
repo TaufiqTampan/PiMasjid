@@ -9,9 +9,21 @@ class RamadhanTest extends TestCase
     /**
      * Test that the Ramadhan schedule page loads successfully
      */
-    public function test_ramadhan_page_can_be_rendered(): void
+    public function test_ramadhan_page_requires_auth_for_guest(): void
     {
         $response = $this->get('/ramadhan');
+
+        $response->assertRedirect('/login');
+    }
+
+    /**
+     * Test that the Ramadhan schedule page loads successfully for authenticated user
+     */
+    public function test_ramadhan_page_can_be_rendered_when_authenticated(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/ramadhan');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
@@ -27,7 +39,9 @@ class RamadhanTest extends TestCase
      */
     public function test_ramadhan_page_accepts_location_parameters(): void
     {
-        $response = $this->get('/ramadhan?lat=-6.9175&lng=107.6191&city=Bandung&year=1446');
+        $user = \App\Models\User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/ramadhan?lat=-6.9175&lng=107.6191&city=Bandung&year=1446');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
@@ -42,7 +56,9 @@ class RamadhanTest extends TestCase
      */
     public function test_ramadhan_pdf_can_be_exported(): void
     {
-        $response = $this->get('/ramadhan/pdf?city=Jakarta&year=1446');
+        $user = \App\Models\User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/ramadhan/pdf?city=Jakarta&year=1446');
 
         $response->assertStatus(200);
         $this->assertNotEmpty($response->getContent());

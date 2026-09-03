@@ -5,13 +5,16 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { UserIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/vue/24/outline';
+import { UserIcon, EnvelopeIcon, LockClosedIcon, PhoneIcon } from '@heroicons/vue/24/outline';
 
 const form = useForm({
     name: '',
     email: '',
+    phone: '',
     password: '',
     password_confirmation: '',
+    website_hp: '',
+    hp_time: Math.floor(Date.now() / 1000),
 });
 
 const submit = () => {
@@ -33,6 +36,11 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">
+            <!-- Honeypot anti-spam hidden inputs -->
+            <div style="display: none !important;" aria-hidden="true">
+                <input type="text" name="website_hp" v-model="form.website_hp" tabindex="-1" autocomplete="off" />
+                <input type="hidden" name="hp_time" v-model="form.hp_time" />
+            </div>
             <div>
                 <InputLabel for="name" value="Nama Lengkap" class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5 ml-1" />
                 <div class="relative group">
@@ -70,6 +78,24 @@ const submit = () => {
                     />
                 </div>
                 <InputError class="mt-2 ml-1" :message="form.errors.email" />
+            </div>
+
+            <div>
+                <InputLabel for="phone" value="No. WhatsApp / HP (Opsional)" class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5 ml-1" />
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary-500 transition-colors">
+                        <PhoneIcon class="h-5 w-5" />
+                    </div>
+                    <TextInput
+                        id="phone"
+                        type="tel"
+                        class="block w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 dark:focus:ring-primary-900/30 rounded-2xl transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 shadow-sm"
+                        v-model="form.phone"
+                        autocomplete="tel"
+                        placeholder="08xxxxxxxxxx"
+                    />
+                </div>
+                <InputError class="mt-2 ml-1" :message="form.errors.phone" />
             </div>
 
             <div>

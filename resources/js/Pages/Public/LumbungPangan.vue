@@ -14,6 +14,7 @@ import {
     InboxArrowDownIcon
 } from '@heroicons/vue/24/outline';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import LoginRequiredModal from '@/Components/Public/LoginRequiredModal.vue';
 
 const props = defineProps({
     programs: {
@@ -32,6 +33,7 @@ const props = defineProps({
 });
 
 const page = usePage();
+const isAuthenticated = computed(() => !!page.props.auth?.user);
 
 // Layout configuration
 defineOptions({
@@ -42,6 +44,8 @@ defineOptions({
 const showDonateModal = ref(false);
 const showRequestModal = ref(false);
 const showSuccessModal = ref(false);
+const showLoginModal = ref(false);
+const loginTargetUrl = ref('/lumbung-pangan');
 const successType = ref('');
 const successData = ref(null);
 const activeProgram = ref(null);
@@ -62,6 +66,8 @@ const donateForm = useForm({
     amount: '',
     items: '',
     proof: null,
+    website_hp: '',
+    hp_time: Math.floor(Date.now() / 1000),
 });
 
 const requestForm = useForm({
@@ -71,21 +77,39 @@ const requestForm = useForm({
     address: '',
     family_members: 1,
     reason: '',
+    website_hp: '',
+    hp_time: Math.floor(Date.now() / 1000),
 });
 
 // Modal control helpers
 const openDonate = (program = null) => {
+    if (!isAuthenticated.value) {
+        loginTargetUrl.value = '/lumbung-pangan';
+        showLoginModal.value = true;
+        return;
+    }
+
     donateForm.reset();
     donateForm.clearErrors();
     activeProgram.value = program;
+    donateForm.donor_name = page.props.auth?.user?.name || '';
+    donateForm.donor_phone = page.props.auth?.user?.phone || '';
     donateForm.food_barn_program_id = program ? program.id : '';
     showDonateModal.value = true;
 };
 
 const openRequest = (program) => {
+    if (!isAuthenticated.value) {
+        loginTargetUrl.value = '/lumbung-pangan';
+        showLoginModal.value = true;
+        return;
+    }
+
     requestForm.reset();
     requestForm.clearErrors();
     activeProgram.value = program;
+    requestForm.name = page.props.auth?.user?.name || '';
+    requestForm.phone = page.props.auth?.user?.phone || '';
     requestForm.food_barn_program_id = program.id;
     showRequestModal.value = true;
 };
@@ -389,6 +413,10 @@ const formatRupiah = (amount) => {
                                 </div>
 
                                 <form @submit.prevent="submitDonation" class="space-y-4">
+                                    <div style="display: none !important;" aria-hidden="true">
+                                        <input type="text" name="website_hp" v-model="donateForm.website_hp" tabindex="-1" autocomplete="off" />
+                                        <input type="hidden" name="hp_time" v-model="donateForm.hp_time" />
+                                    </div>
                                     <div>
                                         <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Nama Lengkap Donatur</label>
                                         <input 
@@ -533,6 +561,10 @@ const formatRupiah = (amount) => {
                                 </div>
 
                                 <form @submit.prevent="submitRequest" class="space-y-4">
+                                    <div style="display: none !important;" aria-hidden="true">
+                                        <input type="text" name="website_hp" v-model="requestForm.website_hp" tabindex="-1" autocomplete="off" />
+                                        <input type="hidden" name="hp_time" v-model="requestForm.hp_time" />
+                                    </div>
                                     <div>
                                         <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Nama Lengkap Kepala Keluarga</label>
                                         <input 
@@ -657,4 +689,11 @@ const formatRupiah = (amount) => {
             </div>
         </div>
     </div>
+
+    <!-- Login Required Modal -->
+    <LoginRequiredModal
+        :show="showLoginModal"
+        :targetUrl="loginTargetUrl"
+        @close="showLoginModal = false"
+    />
 </template>
